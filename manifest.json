@@ -1,12 +1,12 @@
 {
-  "name": "Meu PWA Completo",
-  "short_name": "PWA Teste",
+  "name": "Controle de Selecionadoras - XCV9",
+  "short_name": "Controle de Selecionadoras",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#4285F4",
   "theme_color": "#4285F4",
-  "description": "Aplicativo PWA de teste completo",
+  "description": "Aplicativo para Controle de Máquinas em XCV9",
   "icons": [
     {
       "src": "https://raw.githubusercontent.com/renaxalv/pwa-assets-luft/main/icon-192.png",
