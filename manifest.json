@@ -9,13 +9,13 @@
   "description": "Aplicativo para Controle de Máquinas em XCV9",
   "icons": [
     {
-      "src": "https://raw.githubusercontent.com/renaxalv/pwa-assets-luft/main/icon-192.png",
+      "src": "/assets/icon-192.png",  // <-- Caminho local corrigido
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://raw.githubusercontent.com/renaxalv/pwa-assets-luft/main/icon-512.png",
+      "src": "/assets/icon-512.png",  // <-- Caminho local corrigido
       "sizes": "512x512",
       "type": "image/png"
     }
