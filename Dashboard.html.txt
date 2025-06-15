@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Empilhadeiras</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+        :root {
+            --color-background: #111827;
+            --color-card-bg: #1F2937;
+            --color-text-primary: #F9FAFB;
+            --color-text-secondary: #D1D5DB;
+            --color-border: #374151;
+            --color-em-uso: #F59E0B;
+            --color-treinamento: #8B5CF6;
+            --color-disponivel: #10B981;
+            --color-manutencao: #3B82F6;
+            --color-total: #9CA3AF;
+            --color-accent: #F5B041;
+            --color-p1w: #6366F1;
+            --color-p1p: #EC4899;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-text-primary);
+            padding: 16px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+        .dashboard-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-shrink: 0;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .dashboard-logo img {
+            height: 40px; 
+            width: auto;
+            display: block;
+        }
+        #loading-indicator {
+            width: 28px;
+            height: 28px;
+            border: 3px solid var(--color-border);
+            border-top-color: var(--color-accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .dashboard-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            color: var(--color-text-secondary);
+            margin: 0; 
+        }
+        .dashboard-title span {
+            font-weight: 400;
+            opacity: 0.9;
+            color: var(--color-accent);
+        }
+        .update-footer {
+            font-size: 20px;
+            color: #6B7280;
+            text-align: right;
+        }
+
+        /* KPI Section */
+        .kpi-section {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+            flex-shrink: 0;
+        }
+        .kpi-box {
+            text-align: center;
+            background-color: var(--color-card-bg);
+            padding: 16px;
+            border-radius: 8px;
+        }
+        .kpi-number {
+            font-size: 3.5rem;
+            font-weight: 900;
+            line-height: 1;
+            transition: color 0.3s ease;
+        }
+        .kpi-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-top: 8px;
+        }
+        #kpi-total .kpi-number { color: var(--color-total); }
+        #kpi-em-uso .kpi-number { color: var(--color-em-uso); }
+        #kpi-treinamento .kpi-number { color: var(--color-treinamento); }
+        #kpi-disponivel .kpi-number { color: var(--color-disponivel); }
+        #kpi-manutencao .kpi-number { color: var(--color-manutencao); }
+
+        /* KPI Number Counter Animation - KEPT */
+        .kpi-number.pulse-animation {
+            animation: kpiPulse 0.5s ease-out;
+        }
+        @keyframes kpiPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Stats Container */
+        .stats-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+        .stats-group h2 {
+            text-align: center;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-text-secondary);
+            margin-bottom: 12px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+        .stats-card {
+            background-color: var(--color-card-bg);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            border-bottom: 4px solid;
+        }
+        .stats-count { 
+            font-size: 2rem; 
+            font-weight: 700; 
+            transition: color 0.3s ease;
+        }
+        .stats-name { 
+            font-size: 0.875rem; 
+            font-weight: 500; 
+            opacity: 0.8; 
+        }
+        #setor-icqa { border-color: #A78BFA; }
+        #setor-inbound { border-color: #60A5FA; }
+        #setor-outbound { border-color: #FBBF24; }
+        #setor-transfer-out { border-color: #F87171; }
+        #estacao-p1w { border-color: var(--color-p1w); }
+        #estacao-p1p { border-color: var(--color-p1p); }
+
+        /* Main Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            flex-grow: 1;
+            min-height: 0;
+        }
+        .status-column {
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+        .column-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding-bottom: 12px;
+            border-bottom: 2px solid;
+            text-align: center;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+        #coluna-em-uso .column-title { border-color: var(--color-em-uso); }
+        #coluna-treinamento .column-title { border-color: var(--color-treinamento); }
+        #coluna-manutencao .column-title { border-color: var(--color-manutencao); }
+        .column-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .maquina-card {
+            background-color: var(--color-card-bg);
+            border-radius: 8px;
+            padding: 8px;
+            border-left: 4px solid;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardEnter 0.5s ease-out forwards;
+            font-size: 0.9em;
+            overflow: hidden;
+            word-break: break-all;
+        }
+        .maquina-id { 
+            font-size: 1.4rem; 
+            font-weight: 700; 
+            line-height: 1.2; 
+        }
+        .maquina-info { 
+            font-size: 0.75rem; 
+            color: var(--color-text-secondary); 
+            margin-top: 4px; 
+            line-height: 1.2; 
+        }
+        .card-fora-turno { border-left-color: #ef4444 !important; }
+        .associado-fora-turno { 
+            color: #EF4444 !important; 
+            font-weight: bold; 
+            position: relative; 
+            animation: pulse 1.5s infinite ease-in-out; 
+        }
+        .associado-fora-turno::after { content: " ⚠"; }
+        @keyframes cardEnter { to { opacity: 1; transform: translateY(0); } }
+        .card-em-uso { border-color: var(--color-em-uso); }
+        .card-treinamento { border-color: var(--color-treinamento); }
+        .card-manutencao { border-color: var(--color-manutencao); }
+        
+        /* Scrollbar styles - Reverted to original */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+
+        /* Tooltip - Reverted positioning */
+        .tooltip-manutencao { position: relative; display: inline-block; cursor: help; }
+        .tooltip-manutencao .tooltip-text { 
+            visibility: hidden; 
+            width: 200px; 
+            background-color: #1F2937; 
+            color: #D1D5DB; 
+            text-align: center; 
+            border-radius: 4px; 
+            padding: 8px; 
+            position: absolute; 
+            z-index: 100; 
+            bottom: 100%;
+            left: 50%; 
+            transform: translateX(-50%); 
+            opacity: 0; 
+            transition: opacity 0.3s;
+            border: 1px solid #374151; 
+            font-size: 12px; 
+            font-weight: normal; 
+        }
+        .tooltip-manutencao:hover .tooltip-text { visibility: visible; opacity: 1; }
+
+        /* Media Queries - Reverted to original */
+        @media (max-width: 1200px) { .dashboard-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            .dashboard-header { flex-direction: column; gap: 12px; }
+            .dashboard-title { font-size: 1.5rem; }
+            .update-footer { font-size: 20px; text-align: right; margin-top: 0; }
+            .kpi-section { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .kpi-number { font-size: 2.2rem; }
+            .kpi-label { font-size: 0.7rem; }
+            .stats-container { grid-template-columns: 1fr; gap: 16px; }
+            .stats-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+            .stats-card { padding: 12px; }
+            .stats-count { font-size: 2rem; }
+            .stats-name { font-size: 0.875rem; }
+            .dashboard-grid { grid-template-columns: 1fr; gap: 16px; }
+            .column-content { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        }
+        @media (max-width: 480px) {
+            .kpi-section { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="dashboard-header">
+        <div class="header-left">
+          <a href="https://luft.com.br" target="_blank" class="dashboard-logo">
+            <img src="https://luft.com.br/wp-content/uploads/elementor/thumbs/luft-logistics-neg-pb11q2ttuc3c636tp2cbq6jyf96g076y4i4wit44mm.png" alt="Luft Logistics Logo">
+          </a>
+          <div id="loading-indicator" class="hidden"></div>
+        </div>
+        <h1 class="dashboard-title">Controle Selecionadoras <span>- XCV9</span></h1>
+        <div class="update-footer">Atualizado em: <span id="last-update">--:--:--</span></div>
+    </header>
+    
+    <section class="kpi-section">
+        <div class="kpi-box" id="kpi-total"><div id="count-total" class="kpi-number">0</div><div class="kpi-label">Total</div></div>
+        <div class="kpi-box" id="kpi-em-uso"><div id="count-em-uso" class="kpi-number">0</div><div class="kpi-label">Em Uso</div></div>
+        <div class="kpi-box" id="kpi-disponivel"><div id="count-disponivel" class="kpi-number">0</div><div class="kpi-label">Disponível</div></div>
+        <div class="kpi-box" id="kpi-treinamento"><div id="count-treinamento" class="kpi-number">0</div><div class="kpi-label">Treinamento</div></div>
+        <div class="kpi-box" id="kpi-manutencao"><div id="count-manutencao" class="kpi-number">0</div><div class="kpi-label">Manutenção</div></div>
+    </section>
+
+    <section class="stats-container">
+        <div class="stats-group" id="setor-container">
+            <h2>Uso por Setor</h2>
+            <div class="stats-grid">
+                <div class="stats-card" id="setor-icqa"><div id="count-icqa" class="stats-count">0</div><div class="stats-name">ICQA</div></div>
+                <div class="stats-card" id="setor-inbound"><div id="count-inbound" class="stats-count">0</div><div class="stats-name">INBOUND</div></div>
+                <div class="stats-card" id="setor-outbound"><div id="count-outbound" class="stats-count">0</div><div class="stats-name">OUTBOUND</div></div>
+                <div class="stats-card" id="setor-transfer-out"><div id="count-transfer-out" class="stats-count">0</div><div class="stats-name">TRANSFER OUT</div></div>
+            </div>
+        </div>
+        <div class="stats-group" id="estacao-container">
+            <h2>Disponível por Estação</h2>
+            <div class="stats-grid">
+                <div class="stats-card" id="estacao-p1w"><div id="count-p1w" class="stats-count">0</div><div class="stats-name">P-1-W</div></div>
+                <div class="stats-card" id="estacao-p1p"><div id="count-p1p" class="stats-count">0</div><div class="stats-name">P-1-P</div></div>
+            </div>
+        </div>
+    </section>
+
+    <main class="dashboard-grid">
+        <div class="status-column" id="coluna-em-uso"><h2 class="column-title">EM USO</h2><div class="column-content" id="lista-em-uso"></div></div>
+        <div class="status-column" id="coluna-treinamento"><h2 class="column-title">TREINAMENTO</h2><div class="column-content" id="lista-treinamento"></div></div>
+        <div class="status-column" id="coluna-manutencao"><h2 class="column-title">MANUTENÇÃO</h2><div class="column-content" id="lista-manutencao"></div></div>
+    </main>
+    
+    <script>
+        const REFRESH_INTERVAL = 30000;
+        const MAX_CARDS_TO_SHOW = 16;
+        const ANIMATION_DURATION = 500;
+
+        // ADICIONE esta constante com a URL do seu Web App do Apps Script
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/SEU_ID_DO_SCRIPT/exec"; // <<-- SUBSTITUA ESTE ID!
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchData();
+            setInterval(fetchData, REFRESH_INTERVAL);
+        });
+
+        function showLoading(isLoading) {
+            const loadingIndicator = document.getElementById('loading-indicator');
+            if (isLoading) {
+                loadingIndicator.classList.remove('hidden');
+                loadingIndicator.style.opacity = '1';
+            } else {
+                loadingIndicator.style.opacity = '0';
+                setTimeout(() => loadingIndicator.classList.add('hidden'), 300);
+            }
+        }
+
+        function fetchData() {
+            showLoading(true);
+            // Mude de google.script.run para fetch
+            fetch(`${APPS_SCRIPT_URL}?action=getDashboard`) // 'action=getDashboard' corresponde à rota no seu doGet(e) do Apps Script
+                .then(response => {
+                    if (!response.ok) { // Verifica se a resposta HTTP foi bem-sucedida
+                        throw new Error(`Erro HTTP: ${response.status}`);
+                    }
+                    return response.json(); // Converte a resposta para JSON
+                })
+                .then(data => {
+                    updateDashboard(data); // Processa os dados recebidos
+                    showLoading(false);
+                })
+                .catch(error => {
+                    handleError(error); // Lida com erros
+                    showLoading(false);
+                });
+        }
+
+        function handleError(error) {
+            console.error('Erro ao buscar dados do Google Apps Script:', error);
+            document.getElementById('last-update').textContent = `Falha às ${new Date().toLocaleTimeString('pt-BR')}`;
+        }
+
+        function animateNumber(elementId, start, end, duration) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            element.classList.remove('pulse-animation');
+            void element.offsetWidth;
+            let startTime = null;
+            const step = (currentTime) => {
+                if (!startTime) startTime = currentTime;
+                const progress = Math.min((currentTime - startTime) / duration, 1);
+                const value = Math.floor(start + (end - start) * progress);
+                element.textContent = value;
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    element.textContent = end;
+                    element.classList.add('pulse-animation');
+                }
+            };
+            requestAnimationFrame(step);
+        }
+
+        function updateDashboard(response) {
+            if (!response || !response.success) {
+                console.error('Falha na resposta do servidor:', response ? response.message : 'Resposta inválida.');
+                handleError(response ? response.message : 'Resposta inválida.');
+                return;
+            }
+
+            const maquinas = response.data;
+            const containers = {
+                "EM USO": document.getElementById('lista-em-uso'),
+                "TREINAMENTO": document.getElementById('lista-treinamento'),
+                "MANUTENÇÃO": document.getElementById('lista-manutencao')
+            };
+
+            const prevCounts = {};
+            document.querySelectorAll('.kpi-number, .stats-count').forEach(el => {
+                prevCounts[el.id] = parseInt(el.textContent, 10) || 0;
+            });
+
+            Object.values(containers).forEach(c => {
+                if(c) c.innerHTML = '';
+            });
+            
+            const statusCounters = { "EM USO": 0, "TREINAMENTO": 0, "DISPONÍVEL": 0, "MANUTENÇÃO": 0 };
+            const setorCounters = { 'ICQA': 0, 'INBOUND': 0, 'OUTBOUND': 0, 'TRANSFER OUT': 0 };
+            const estacaoCounters = { 'P-1-W': 0, 'P-1-P': 0 };
+            const setorMapping = { 'SUPORTE IB': 'INBOUND', 'SUPORTE OB': 'OUTBOUND' };
+
+            const maquinasPorStatus = {
+                "EM USO": [],
+                "TREINAMENTO": [],
+                "MANUTENÇÃO": []
+            };
+
+            maquinas.forEach((maq) => {
+                const status = maq.status ? maq.status.toUpperCase().trim() : 'INDEFINIDO';
+                if (statusCounters.hasOwnProperty(status)) { statusCounters[status]++; }
+                if (maquinasPorStatus[status]) { maquinasPorStatus[status].push(maq); }
+
+                if (status === 'EM USO' || status === 'TREINAMENTO') {
+                    let setor = maq.setor ? maq.setor.toUpperCase().trim() : '';
+                    setor = setorMapping[setor] || setor;
+                    if (setor.includes('ICQA')) { setorCounters['ICQA']++; } 
+                    else if (setorCounters.hasOwnProperty(setor)) { setorCounters[setor]++; }
+                }
+                if (status === 'DISPONÍVEL') {
+                    const estacao = maq.estacao ? maq.estacao.toUpperCase().trim() : '';
+                    if (estacaoCounters.hasOwnProperty(estacao)) { estacaoCounters[estacao]++; }
+                }
+            });
+
+            animateNumber('count-total', prevCounts['count-total'], maquinas.length, ANIMATION_DURATION);
+            animateNumber('count-em-uso', prevCounts['count-em-uso'], statusCounters['EM USO'], ANIMATION_DURATION);
+            animateNumber('count-treinamento', prevCounts['count-treinamento'], statusCounters['TREINAMENTO'], ANIMATION_DURATION);
+            animateNumber('count-disponivel', prevCounts['count-disponivel'], statusCounters['DISPONÍVEL'], ANIMATION_DURATION);
+            animateNumber('count-manutencao', prevCounts['count-manutencao'], statusCounters['MANUTENÇÃO'], ANIMATION_DURATION);
+            
+            animateNumber('count-icqa', prevCounts['count-icqa'], setorCounters['ICQA'], ANIMATION_DURATION);
+            animateNumber('count-inbound', prevCounts['count-inbound'], setorCounters['INBOUND'], ANIMATION_DURATION);
+            animateNumber('count-outbound', prevCounts['count-outbound'], setorCounters['OUTBOUND'], ANIMATION_DURATION);
+            animateNumber('count-transfer-out', prevCounts['count-transfer-out'], setorCounters['TRANSFER OUT'], ANIMATION_DURATION);
+            animateNumber('count-p1w', prevCounts['count-p1w'], estacaoCounters['P-1-W'], ANIMATION_DURATION);
+            animateNumber('count-p1p', prevCounts['count-p1p'], estacaoCounters['P-1-P'], ANIMATION_DURATION);
+
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString('pt-BR');
+
+            for (const status in maquinasPorStatus) {
+                const lista = maquinasPorStatus[status];
+                lista.sort((a, b) => new Date(a.data) - new Date(b.data));
+                const listaLimitada = lista.slice(0, MAX_CARDS_TO_SHOW);
+                const container = containers[status];
+                if (container) {
+                    listaLimitada.forEach((maq, index) => {
+                        const card = createMaquinaCard(maq);
+                        card.style.animationDelay = `${index * 20}ms`;
+                        container.appendChild(card);
+                    });
+                }
+            }
+        }
+
+        function createMaquinaCard(maq) {
+            const card = document.createElement('div');
+            card.className = 'maquina-card';
+            const statusUpper = maq.status ? maq.status.toUpperCase().trim() : 'INDEFINIDO';
+            switch(statusUpper) {
+                case 'EM USO':
+                    card.classList.add('card-em-uso');
+                    if (maq.foraTurno) { card.classList.add('card-fora-turno'); }
+                    const userClass = maq.foraTurno ? 'associado-fora-turno' : '';
+                    card.innerHTML = `<div class="maquina-info ${userClass}">${maq.user || 'N/A'}</div><div class="maquina-id">${maq.id}</div><div class="maquina-info">${formatTimeAgo(maq.data)}</div>`;
+                    break;
+                case 'TREINAMENTO':
+                    card.classList.add('card-treinamento');
+                    card.innerHTML = `<div class="maquina-info">${maq.user || 'N/A'}</div><div class="maquina-id">${maq.id}</div><div class="maquina-info">${formatTimeAgo(maq.data)}</div>`;
+                    break;
+                case 'MANUTENÇÃO':
+                    card.classList.add('card-manutencao');
+                    card.innerHTML = `<div class="maquina-id">${maq.id}</div><div class="tooltip-manutencao maquina-info">${formatTimeAgo(maq.data)}<span class="tooltip-text">${maq.problema || 'Não especificado'}</span></div>`;
+                    break;
+            }
+            return card;
+        }
+
+       function formatTimeAgo(isoDateString) {
+            if (!isoDateString) return 'N/A';
+            const date = new Date(isoDateString);
+            
+            if (isNaN(date.getTime())) {
+                return isoDateString; 
+            }
+
+            const now = new Date();
+            const diffSeconds = Math.round((now - date) / 1000);
+            const diffMinutes = Math.round(diffSeconds / 60);
+            const diffHours = Math.round(diffMinutes / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffMinutes < 1) return `agora`;
+            if (diffMinutes < 60) return `há ${diffMinutes} min`;
+            if (diffHours < 24) return `há ${diffHours}h`;
+            
+            if (diffDays === 1) {
+                return `há 1 dia`;
+            } else {
+                return `há ${diffDays} dias`;
+            }
+        }
+        
+    </script>
+</body>
+</html>

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treinamento Selecionadora</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        :root {
+            --color-primary: #8E44AD;
+            --color-primary-dark: #7D3C98;
+            --color-success: #7DCEA0;
+            --color-error: #EC7063;
+            --color-info-bg: #E8DAEF;
+            --color-info-text: #6C3483;
+            --color-text: #2C3E50;
+            --color-text-light: #7F8C8D;
+            --color-bg: #EAECEE;
+            --color-container-bg: rgba(255, 255, 255, 0.8);
+            --border-radius-md: 8px;
+            --border-radius-lg: 12px;
+            --box-shadow-soft: 0 4px 10px rgba(0, 0, 0, 0.08);
+            --box-shadow-medium: 0 10px 30px rgba(0, 0, 0, 0.15);
+            --box-shadow-strong: 0 15px 40px rgba(0, 0, 0, 0.2);
+            --glass-blur: 8px;
+            --dark-bg: #1A2127;
+            --dark-bg-end: #2F3943;
+            --dark-container-bg: rgba(43, 53, 62, 0.7);
+            --dark-text: #E0E0E0;
+            --dark-text-light: #A0A0A0;
+            --dark-input-bg: #37414A;
+            --dark-input-border: #55606A;
+            --dark-info-bg: rgba(55, 65, 74, 0.7);
+            --dark-info-text: #F5B041;
+            --dark-success: #87E0A8;
+            --dark-error: #FF8F82;
+            --dark-treinamento-primary: #AB7AC0;
+            --dark-treinamento-primary-dark: #8E44AD;
+        }
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: linear-gradient(45deg, #F0E6F7, #E1D1ED);
+            background-size: 200% 200%;
+            animation: gradientAnimation 10s ease infinite;
+            color: var(--color-text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 30px;
+            box-sizing: border-box;
+            overflow: hidden;
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+        body.dark-mode {
+            background: linear-gradient(45deg, var(--dark-bg), var(--dark-bg-end));
+            background-size: 200% 200%;
+            animation: gradientAnimation 10s ease infinite;
+            color: var(--dark-text);
+        }
+        body.dark-mode .container {
+            background: var(--dark-container-bg);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(80, 80, 80, 0.4);
+        }
+        body.dark-mode h1#mainTitle {
+            color: var(--dark-treinamento-primary);
+        }
+        body.dark-mode h1#mainTitle::after {
+            background-color: var(--dark-treinamento-primary-dark);
+        }
+        body.dark-mode .scanner-area {
+            background: var(--dark-input-bg);
+            border-color: var(--dark-input-border);
+        }
+        body.dark-mode .scanner-area::before {
+            background: linear-gradient(to right, transparent, var(--dark-treinamento-primary), transparent);
+        }
+        body.dark-mode label {
+            color: var(--dark-text-light);
+        }
+        body.dark-mode label::before {
+            filter: brightness(1.5);
+        }
+        body.dark-mode input[type="text"] {
+            background-color: var(--dark-input-bg);
+            border-color: var(--dark-input-border);
+            color: var(--dark-text);
+        }
+        body.dark-mode input[type="text"]:focus {
+            border-color: var(--dark-treinamento-primary);
+            box-shadow: 0 0 0 4px rgba(171, 122, 192, 0.2);
+        }
+        body.dark-mode .user-info {
+            background: var(--dark-info-bg);
+            color: var(--dark-info-text);
+            border: 1px solid var(--dark-info-text);
+        }
+        body.dark-mode .message.success {
+            background: rgba(102, 255, 153, 0.1);
+            color: var(--dark-success);
+            border-color: var(--dark-success);
+        }
+        body.dark-mode .message.success::after { background-color: var(--dark-success); }
+        body.dark-mode .message.error {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--dark-error);
+            border-color: var(--dark-error);
+        }
+        body.dark-mode .message.error::after { background-color: var(--dark-error); }
+        body.dark-mode .message.info {
+            background-color: var(--dark-info-bg);
+            color: var(--dark-info-text);
+            border: 1px solid var(--dark-info-text);
+        }
+        body.dark-mode .voltar-btn {
+            background-color: var(--dark-treinamento-primary);
+            color: var(--dark-bg);
+            box-shadow: var(--box-shadow-medium);
+        }
+        body.dark-mode .voltar-btn:hover {
+            background-color: var(--dark-treinamento-primary-dark);
+            box-shadow: var(--box-shadow-strong);
+        }
+        body.dark-mode .voltar-btn::after {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes slideUp {
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeInText {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes expandLine {
+            to { transform: scaleX(1); }
+        }
+        .container {
+            background: var(--color-container-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            padding: 50px;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--box-shadow-medium);
+            width: 100%;
+            max-width: 550px;
+            text-align: center;
+            transform: translateY(-20px);
+            opacity: 0;
+            animation: slideUp 0.6s 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            position: relative;
+            transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+        h1#mainTitle {
+            color: var(--color-primary);
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 2.5em;
+            letter-spacing: -0.5px;
+            position: relative;
+            animation: fadeInText 1s ease-out forwards;
+            transition: color 0.5s ease;
+        }
+        h1#mainTitle::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background-color: var(--color-primary-dark);
+            margin: 15px auto 0;
+            border-radius: 2px;
+            transform: scaleX(0);
+            animation: expandLine 1s ease-out 0.8s forwards;
+            transition: background-color 0.5s ease;
+        }
+        .scanner-area {
+            background: #FBFCFC;
+            padding: 25px;
+            border-radius: var(--border-radius-md);
+            margin-bottom: 25px;
+            border: 1px solid #EAECEE;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInElement 0.6s ease-out 0.6s forwards;
+            opacity: 0;
+            transition: background 0.5s ease, border-color 0.5s ease;
+        }
+        .scanner-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, transparent, var(--color-primary), transparent);
+            animation: scanLine 3s infinite linear;
+            opacity: 0.7;
+        }
+        @keyframes scanLine {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .form-group {
+            margin-bottom: 22px;
+        }
+        @keyframes fadeInElement {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .hidden { display: none !important; }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--color-text-light);
+            font-size: 0.9em;
+            position: relative;
+            padding-left: 25px;
+            transition: color 0.5s ease;
+        }
+        label::before {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+        }
+        #loginLabel::before { content: '👤'; }
+        #chaveLabel::before { content: '🔑'; }
+        input[type="text"] {
+            width: 100%;
+            padding: 18px 20px;
+            font-size: 1.1em;
+            border: 2px solid #D5DBDB;
+            border-radius: var(--border-radius-md);
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--color-text);
+        }
+        input[type="text"]:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 10px rgba(142, 68, 173, 0.5);
+            outline: none;
+            transform: translateY(-2px);
+        }
+        .user-info, .message {
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: var(--border-radius-md);
+            font-weight: 500;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+        }
+        .message::before { font-size: 1.3em; margin-right: 10px; }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+        .user-info { background: var(--color-info-bg); color: var(--color-info-text); border: 1px solid var(--color-info-text); }
+        .message.success { background: #D5F5E3; color: #1D8348; border: 1px solid var(--color-success); }
+        .message.success::before { content: '✅'; }
+        .message.error { background: #FADBD8; color: #C0392B; border: 1px solid var(--color-error); }
+        .message.error::before { content: '❌'; }
+        .message.info { background-color: var(--color-info-bg); color: var(--color-info-text); border: 1px solid var(--color-info-text); }
+        .message.info::before { content: '🔍'; }
+        @keyframes shrink-right-to-left {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
+        .message::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 5px;
+            width: 100%;
+            transform-origin: left;
+            transition: background-color 0.5s ease;
+        }
+        .message.cooldown-success::after {
+            background-color: var(--color-success);
+            animation: shrink-right-to-left 3.5s linear forwards;
+        }
+        .message.cooldown-error::after {
+            background-color: var(--color-error);
+            animation: shrink-right-to-left 3.5s linear forwards;
+        }
+        .voltar-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 65px;
+            height: 65px;
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 2.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--box-shadow-medium);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            z-index: 1001;
+            overflow: hidden;
+            line-height: 1;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .voltar-btn:hover {
+            background-color: var(--color-primary-dark);
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: var(--box-shadow-strong);
+            animation: none;
+        }
+        .voltar-btn:active {
+            transform: scale(0.95);
+            box-shadow: var(--box-shadow-soft);
+        }
+        .voltar-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(1) translate(-50%, -50%);
+            transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+        }
+        .voltar-btn:hover::after {
+            transform: scale(80) translate(-50%, -50%);
+            opacity: 1;
+        }
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .container { padding: 30px; max-width: 95%; }
+            h1#mainTitle { font-size: 2em; margin-bottom: 20px; }
+            input[type="text"] { padding: 15px 15px; font-size: 1em; }
+            .user-info, .message {
+                padding: 10px 15px;
+                font-size: 0.9em;
+            }
+            .voltar-btn {
+                width: 55px;
+                height: 55px;
+                font-size: 1.8em;
+                bottom: 20px;
+                left: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<a href="index.html" class="voltar-btn" title="Voltar para Operação">&#8629;</a>
+<div id="mainContent">
+    <div class="container">
+        <h1 id="mainTitle">Treinamento Selecionadora</h1>
+        <div class="scanner-area">
+            <div class="form-group" id="loginFormGroup">
+                <label for="login" id="loginLabel">LOGIN DO OPERADOR</label>
+                <input type="text" id="login" placeholder="Bipe o QR code do login" autofocus>
+            </div>
+            <div id="userDisplay" class="user-info hidden"></div>
+            <div class="form-group hidden" id="chaveFormGroup">
+                <label for="chave" id="chaveLabel">CHAVE DA MÁQUINA</label>
+                <input type="text" id="chave" placeholder="Bipe o QR code da máquina" maxlength="3" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            </div>
+            <div id="message" class="message hidden">
+                <span id="messageText"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // ADICIONE esta constante com a URL do seu Web App do Apps Script
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/SEU_ID_DO_SCRIPT/exec"; // <<-- SUBSTITUA ESTE ID!
+
+    let currentUser = null;
+    let estacaoSelecionada = localStorage.getItem('estacaoSelecionada'); // Esta linha pode precisar de ajuste dependendo de como 'estacaoSelecionada' é usada no contexto de treinamento. No seu GAS não vi uso direto dela para treinamento.
+    const mainContent = document.getElementById('mainContent');
+    const loginInput = document.getElementById('login');
+    const chaveInput = document.getElementById('chave');
+    const userDisplay = document.getElementById('userDisplay');
+    const chaveFormGroup = document.getElementById('chaveFormGroup');
+    const messageDiv = document.getElementById('message');
+    const messageTextSpan = document.getElementById('messageText');
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+        }
+
+        // Registro do Service Worker e Manifest (ADICIONADO)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log("Service Worker registrado com sucesso em Treinamento!"))
+                .catch(err => console.error("Erro ao registrar Service Worker em Treinamento:", err));
+        }
+
+        loginInput.focus();
+        [loginInput, chaveInput].forEach(inputEl => {
+            if(inputEl) {
+                inputEl.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const valor = e.target.value.trim();
+                        if(!valor) {
+                            exibirMensagem("Por favor, insira um valor.", 'error');
+                            if (e.target.id === 'login') loginInput.classList.add('shake');
+                            else if (e.target.id === 'chave') chaveInput.classList.add('shake');
+                            setTimeout(() => {
+                                if (e.target.id === 'login') loginInput.classList.remove('shake');
+                                else if (e.target.id === 'chave') chaveInput.classList.remove('shake');
+                            }, 500);
+                            return;
+                        }
+                        if (e.target.id === 'login') processarLogin(valor);
+                        else if (e.target.id === 'chave' && currentUser) processarChaveTreinamento(valor);
+                    }
+                });
+            }
+        });
+    });
+
+    function showElement(element) { if(element) element.classList.remove('hidden'); }
+    function hideElement(element) { if(element) element.classList.add('hidden'); }
+
+    async function processarLogin(login) {
+        exibirMensagem("Verificando login...", "info", true);
+        try {
+            const response = await fetch(`${APPS_SCRIPT_URL}?action=verificarLogin&userLogin=${encodeURIComponent(login)}`);
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+            const data = await response.json();
+
+            hideElement(messageDiv);
+            if (data.success) {
+                currentUser = data.data;
+                mostrarUsuario(currentUser.nome);
+            } else {
+                exibirMensagem(data.message, 'error');
+                loginInput.classList.add('shake');
+                setTimeout(() => loginInput.classList.remove('shake'), 500);
+                limparCampo('login');
+            }
+        } catch (err) {
+            handleServerError(err);
+        }
+    }
+
+    async function processarChaveTreinamento(chave) {
+        exibirMensagem("Registrando treinamento...", "info", true); // Adicionado para feedback
+        try {
+            const response = await fetch(`${APPS_SCRIPT_URL}?action=registrarTreinamento&idMaq=${encodeURIComponent(chave)}&userLogin=${encodeURIComponent(currentUser.login)}&estacao=TREINAMENTO`); // 'TREINAMENTO' fixo para estação
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+            const data = await response.json();
+            handleServerResponse(data);
+        } catch (err) {
+            handleServerError(err);
+            chaveInput.classList.add('shake');
+            setTimeout(() => chaveInput.classList.remove('shake'), 500);
+            limparCampo('chave');
+        }
+    }
+
+    function handleServerResponse(response) {
+        exibirMensagem(response.message, response.success ? 'success' : 'error');
+        if (response.success) {
+            messageDiv.classList.add('cooldown-success');
+        } else {
+            messageDiv.classList.add('cooldown-error');
+            messageDiv.classList.add('shake');
+            setTimeout(() => messageDiv.classList.remove('shake'), 500);
+        }
+        setTimeout(resetarFormulario, 3500);
+    }
+
+    function handleServerError(err) {
+        exibirMensagem(`Erro de comunicação: ${err.message}`, 'error');
+        messageDiv.classList.add('shake');
+        setTimeout(() => messageDiv.classList.remove('shake'), 500);
+        console.error("Erro no fetch:", err); // Para depuração
+    }
+
+    function exibirMensagem(texto, tipo, isTemporary = false) {
+        messageDiv.className = 'message';
+        messageDiv.classList.add(tipo);
+        messageTextSpan.textContent = texto;
+        showElement(messageDiv);
+        if (!isTemporary && (tipo === 'success' || tipo === 'error')) {
+            // Mensagens não temporárias (sucesso/erro) não se fecham automaticamente aqui.
+        } else if (isTemporary) {
+            setTimeout(() => {
+                if (messageTextSpan.textContent === texto) {
+                    hideElement(messageDiv);
+                    messageDiv.classList.remove('cooldown-success', 'cooldown-error');
+                }
+            }, 3000);
+        }
+    }
+
+    function mostrarUsuario(nome) {
+        if (!userDisplay) return;
+        const primeiroNome = nome ? nome.split(' ')[0] : 'Operador';
+        userDisplay.innerHTML = `👋 Olá, <strong> ${primeiroNome} </strong>!`;
+        showElement(userDisplay);
+        showElement(chaveFormGroup);
+        if(chaveInput) chaveInput.focus();
+    }
+
+    function limparCampo(id) { if(document.getElementById(id)) document.getElementById(id).value = ''; }
+
+    function resetarFormulario() {
+        limparCampo('login');
+        limparCampo('chave');
+        currentUser = null;
+        hideElement(messageDiv);
+        hideElement(chaveFormGroup);
+        hideElement(userDisplay);
+        messageDiv.classList.remove('cooldown-success', 'cooldown-error');
+        loginInput.focus();
+    }
+</script>
+</body>
+</html>

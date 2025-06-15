@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Selecionadoras</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        :root {
+            /* Light Mode Colors (Laranja principal) */
+            --color-primary: #F5B041;
+            --color-primary-dark: #D68910;
+            --color-accent: #5DADE2;
+            --color-accent-dark: #3498DB;
+            --color-success: #7DCEA0;
+            --color-error: #EC7063;
+            --color-info-bg: #FDEBD0;
+            --color-info-text: #AF6418;
+            --color-text: #2C3E50;
+            --color-text-light: #7F8C8D;
+            --color-bg: #EAECEE;
+            --color-container-bg: rgba(255, 255, 255, 0.8);
+            --border-radius-md: 8px;
+            --border-radius-lg: 15px;
+            --box-shadow-soft: 0 4px 10px rgba(0, 0, 0, 0.08);
+            --box-shadow-medium: 0 10px 30px rgba(0, 0, 0, 0.15);
+            --box-shadow-strong: 0 15px 40px rgba(0, 0, 0, 0.2);
+            --glass-blur: 8px;
+
+            /* Dark Mode General Colors (Ajustado para maior contraste e cor principal laranja) */
+            --dark-container-bg: rgba(43, 53, 62, 0.5);
+            --dark-text: #E0E0E0;
+            --dark-text-light: #A0A0A0;
+            --dark-input-bg: #37414A;
+            --dark-input-border: #55606A;
+            --dark-info-bg: rgba(55, 65, 74, 0.7);
+            --dark-info-text: #F5B041;
+            --dark-primary: #F5B041;
+            --dark-primary-dark: #D68910;
+            --dark-success: #87E0A8;
+            --dark-error: #FF8F82;
+            --dark-menu-bg: rgba(43, 53, 62, 0.9);
+            --dark-menu-item-hover: #454545;
+        }
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: linear-gradient(45deg, #FFF0D9, #FFAA4A);
+            background-size: 200% 200%;
+            animation: gradientAnimation 10s ease infinite;
+            color: var(--color-text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 30px;
+            box-sizing: border-box;
+            overflow: hidden;
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+        body.dark-mode {
+            background: linear-gradient(45deg, #1A2127, #2F3943);
+            background-size: 200% 200%;
+            animation: gradientAnimation 10s ease infinite;
+            color: var(--dark-text);
+        }
+        body.dark-mode .container {
+            background: var(--dark-container-bg);
+            border: 1px solid rgba(80, 80, 80, 0.4);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        body.dark-mode h1#mainTitle {
+            color: var(--dark-primary);
+        }
+        body.dark-mode h1#mainTitle::after {
+            background-color: var(--dark-primary-dark);
+        }
+        body.dark-mode .scanner-area {
+            background: var(--dark-input-bg);
+            border: 1px solid var(--dark-input-border);
+        }
+        body.dark-mode .scanner-area::before {
+            background: linear-gradient(to right, transparent, var(--dark-primary), transparent);
+        }
+        body.dark-mode label {
+            color: var(--dark-text-light);
+        }
+        body.dark-mode input[type="text"] {
+            background-color: var(--dark-input-bg);
+            border-color: var(--dark-input-border);
+            color: var(--dark-text);
+        }
+        body.dark-mode input[type="text"]:focus {
+            border-color: var(--dark-primary);
+            box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+        }
+        body.dark-mode .user-info {
+            background: var(--dark-info-bg);
+            color: var(--dark-info-text);
+            border: 1px solid var(--dark-info-text);
+        }
+        body.dark-mode .message.success {
+            background: rgba(102, 255, 153, 0.1);
+            color: var(--dark-success);
+            border-color: var(--dark-success);
+        }
+        body.dark-mode .message.success::after { background-color: var(--dark-success); }
+        body.dark-mode .message.error {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--dark-error);
+            border-color: var(--dark-error);
+        }
+        body.dark-mode .message.error::after { background-color: var(--dark-error); }
+        body.dark-mode .message.info {
+            background-color: var(--dark-info-bg);
+            color: var(--dark-info-text);
+            border: 1px solid var(--dark-info-text);
+        }
+        body.dark-mode .modal-content {
+            background-color: var(--dark-container-bg);
+            border: 1px solid rgba(80, 80, 80, 0.4);
+        }
+        body.dark-mode .modal h2 {
+            color: var(--dark-primary);
+        }
+        body.dark-mode .modal p {
+            color: var(--dark-text-light);
+        }
+        body.dark-mode .estacao-btn {
+            background-image: linear-gradient(to right, var(--dark-primary) 0%, var(--dark-primary-dark) 70%, var(--dark-primary) 100%);
+            color: #FFF;
+        }
+        body.dark-mode .estacao-btn:hover {
+            background-position: right center;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2);
+        }
+        body.dark-mode .estacao-btn::after {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        body.dark-mode .estacao-btn:nth-child(even) {
+            background-image: linear-gradient(to right, var(--color-accent) 0%, var(--color-accent-dark) 70%, var(--color-accent) 100%);
+            color: white;
+        }
+        body.dark-mode .dropdown-container .menu-toggle {
+            background-color: var(--dark-primary);
+            box-shadow: var(--box-shadow-medium);
+        }
+        body.dark-mode .dropdown-container .menu-toggle:hover {
+            background-color: var(--dark-primary-dark);
+        }
+        body.dark-mode .menu-content {
+            background-color: var(--dark-menu-bg);
+            box-shadow: var(--box-shadow-strong);
+        }
+        body.dark-mode .menu-item:hover {
+            background-color: var(--dark-menu-item-hover);
+        }
+        body.dark-mode .menu-item::before {
+            background-color: var(--dark-primary);
+        }
+        body.dark-mode .menu-icon, body.dark-mode .menu-title {
+            color: var(--dark-text);
+        }
+        body.dark-mode .dark-mode-toggle span {
+            color: var(--dark-text);
+        }
+        body.dark-mode .dark-mode-toggle:hover {
+            background-color: var(--dark-menu-item-hover);
+        }
+        body.dark-mode .toggle-switch .slider {
+            background-color: #666;
+        }
+        body.dark-mode input:checked + .slider {
+            background-color: var(--color-accent);
+        }
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .container {
+            background: var(--color-container-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            padding: 50px;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--box-shadow-medium);
+            width: 100%;
+            max-width: 550px;
+            text-align: center;
+            transform: translateY(-20px);
+            opacity: 0;
+            animation: slideUp 0.6s 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            position: relative;
+            transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+        @keyframes slideUp {
+            to { transform: translateY(0); opacity: 1; }
+        }
+        h1#mainTitle {
+            color: var(--color-primary);
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 2.5em;
+            letter-spacing: -0.5px;
+            position: relative;
+            animation: fadeInText 1s ease-out forwards;
+            transition: color 0.5s ease;
+        }
+        h1#mainTitle::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background-color: var(--color-primary-dark);
+            margin: 15px auto 0;
+            border-radius: 2px;
+            transform: scaleX(0);
+            animation: expandLine 1s ease-out 0.8s forwards;
+            transition: background-color 0.5s ease;
+        }
+        @keyframes expandLine {
+            to { transform: scaleX(1); }
+        }
+        .scanner-area {
+            background: #FBFCFC;
+            padding: 25px;
+            border-radius: var(--border-radius-md);
+            margin-bottom: 25px;
+            border: 1px solid #EAECEE;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInElement 0.6s ease-out 0.6s forwards;
+            opacity: 0;
+        }
+        .scanner-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, transparent, var(--color-primary), transparent);
+            animation: scanLine 3s infinite linear;
+            opacity: 1;
+        }
+        @keyframes scanLine {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .form-group {
+            margin-bottom: 22px;
+        }
+        @keyframes fadeInElement {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .hidden {
+            display: none !important;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--color-text-light);
+            font-size: 0.9em;
+            position: relative;
+            padding-left: 25px;
+        }
+        label::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+        }
+        #loginLabel::before { content: '👤'; }
+        #chaveLabel::before { content: '🔑'; }
+        input[type="text"] {
+            width: 100%;
+            padding: 18px 20px;
+            font-size: 1.1em;
+            border: 2px solid #D5DBDB;
+            border-radius: var(--border-radius-md);
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--color-text);
+        }
+        input[type="text"]:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 10px rgba(245, 176, 65, 0.5);
+            outline: none;
+            transform: translateY(-2px);
+        }
+        .user-info, .message {
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: var(--border-radius-md);
+            font-weight: 500;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            position: relative;
+            overflow: hidden;
+        }
+        .message::before {
+            font-size: 1.3em;
+            margin-right: 10px;
+        }
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .user-info {
+            background: var(--color-info-bg);
+            color: var(--color-info-text);
+            border: 1px solid var(--color-info-text);
+        }
+        .message.success {
+            background: #D5F5E3;
+            color: #1D8348;
+            border: 1px solid var(--color-success);
+        }
+        .message.success::before {
+            content: '✅';
+        }
+        .message.error {
+            background: #FADBD8;
+            color: #C0392B;
+            border: 1px solid var(--color-error);
+        }
+        .message.error::before {
+            content: '❌';
+        }
+        .message.info {
+            background-color: var(--color-info-bg);
+            color: var(--color-info-text);
+            border: 1px solid var(--color-info-text);
+        }
+        .message.info::before {
+            content: '🔍';
+        }
+        @keyframes shrink-right-to-left {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
+        .message::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 5px;
+            width: 100%;
+            transform-origin: left;
+        }
+        .message.cooldown-success::after {
+            background-color: var(--color-success);
+            animation: shrink-right-to-left 3.5s linear forwards;
+        }
+        .message.cooldown-error::after {
+            background-color: var(--color-error);
+            animation: shrink-right-to-left 3.5s linear forwards;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(44, 62, 80, 0.5);
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal.show {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-content {
+            background-color: var(--color-container-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            padding: 35px;
+            width: 90%;
+            max-width: 480px;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--box-shadow-medium);
+            text-align: center;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .modal.show .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .modal h2 {
+            color: var(--color-primary);
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 1.8em;
+        }
+        .modal p {
+            color: var(--color-text-light);
+            margin-bottom: 25px;
+            font-size: 1.05em;
+        }
+        .estacao-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 12px 0;
+            font-size: 1.05em;
+            font-weight: 600;
+            background-image: linear-gradient(to right, var(--color-primary) 0%, var(--color-primary-dark) 70%, var(--color-primary) 100%);
+            background-size: 200% auto;
+            color: white;
+            border: none;
+            border-radius: var(--border-radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--box-shadow-soft);
+            position: relative;
+            overflow: hidden;
+        }
+        .estacao-btn:hover {
+            background-position: right center;
+            transform: translateY(-3px);
+            box-shadow: var(--box-shadow-medium);
+        }
+        .estacao-btn:active {
+            transform: translateY(0);
+            box-shadow: var(--box-shadow-soft);
+        }
+        .estacao-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(1) translate(-50%, -50%);
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        }
+        .estacao-btn:hover::after {
+            transform: scale(20) translate(-50%, -50%);
+            opacity: 1;
+        }
+        .estacao-btn:nth-child(even) {
+            background-image: linear-gradient(to right, var(--color-accent) 0%, var(--color-accent-dark) 70%, var(--color-accent) 100%);
+            color: white;
+        }
+        .dropdown-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1002;
+        }
+        .menu-toggle {
+            width: 50px;
+            height: 50px;
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: var(--box-shadow-soft);
+            transition: transform 0.3s ease, border-radius 0.3s ease, background-color 0.3s ease;
+            position: relative;
+            z-index: 1003;
+        }
+        .menu-toggle:hover {
+            transform: scale(1.1);
+            background-color: var(--color-primary-dark);
+        }
+        .menu-toggle span {
+            transition: transform 0.3s ease;
+        }
+        .dropdown-container.is-open .menu-toggle span {
+            transform: rotate(90deg);
+        }
+        .menu-content {
+            background-color: var(--color-primary);
+            padding: 55px 15px 15px 15px;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--box-shadow-medium);
+            transform: scaleY(0);
+            transform-origin: top center;
+            opacity: 0;
+            visibility: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 220px;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.2s ease, background-color 0.3s ease;
+        }
+        .dropdown-container.is-open .menu-content {
+            transform: scaleY(1);
+            opacity: 1;
+            visibility: visible;
+        }
+        .dropdown-container.is-open .menu-toggle {
+            border-radius: 15px;
+        }
+
+        .dark-mode-toggle-corner {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 5px;
+            border-radius: var(--border-radius-md);
+            background-color: rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            border: none;
+            margin: 0;
+            box-shadow: none;
+        }
+
+        .dark-mode-toggle-corner:hover {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            gap: 15px;
+            padding: 12px;
+            border-radius: var(--border-radius-md);
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            color: white;
+            margin-bottom: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background-color: white;
+            transform: scaleY(0);
+            transform-origin: top;
+            transition: transform 0.3s ease-out;
+        }
+        .menu-item:hover::before {
+            transform: scaleY(1);
+        }
+        .menu-item:hover {
+            background-color: var(--color-primary-dark);
+            transform: translateX(5px);
+        }
+        .menu-icon {
+            font-size: 1.8em;
+            color: white;
+            transition: transform 0.2s ease;
+        }
+        .menu-item:hover .menu-icon {
+            transform: rotate(5deg);
+        }
+        .menu-title {
+            font-size: 1em;
+            font-weight: 500;
+            color: white;
+        }
+        .dark-mode-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border-radius: var(--border-radius-md);
+            gap: 10px;
+        }
+        .dark-mode-toggle-corner.dark-mode-toggle:hover {
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        .dark-mode-toggle span {
+            font-size: 1em;
+            font-weight: 500;
+            color: white;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "☀️";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            line-height: 1;
+        }
+        input:checked + .slider {
+            background-color: var(--color-accent);
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+            content: "🌙";
+            background-color: white;
+        }
+        body.dark-mode .container {
+            background: var(--dark-container-bg);
+            border: 1px solid rgba(80, 80, 80, 0.4);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        body.dark-mode h1#mainTitle {
+            color: var(--dark-primary);
+        }
+        body.dark-mode .scanner-area {
+            background: var(--dark-input-bg);
+            border: 1px solid var(--dark-input-border);
+        }
+        body.dark-mode .scanner-area::before {
+            background: linear-gradient(to right, transparent, var(--dark-primary), transparent);
+        }
+        body.dark-mode label {
+            color: var(--dark-text-light);
+        }
+        body.dark-mode input[type="text"] {
+            background-color: var(--dark-input-bg);
+            border-color: var(--dark-input-border);
+            color: var(--dark-text);
+        }
+        body.dark-mode input[type="text"]:focus {
+            border-color: var(--dark-primary);
+            box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
+        }
+        body.dark-mode .user-info {
+            background: var(--dark-info-bg);
+            color: var(--dark-info-text);
+            border: 1px solid var(--dark-info-text);
+        }
+        body.dark-mode .message.success {
+            background: rgba(102, 255, 153, 0.1);
+            color: var(--dark-success);
+            border-color: var(--dark-success);
+        }
+        body.dark-mode .message.success::after { background-color: var(--dark-success); }
+        body.dark-mode .message.error {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--dark-error);
+            border-color: var(--dark-error);
+        }
+        body.dark-mode .message.error::after { background-color: var(--dark-error); }
+        body.dark-mode .message.info {
+            background-color: var(--dark-info-bg);
+            color: var(--dark-info-text);
+            border: 1px solid var(--dark-info-text);
+        }
+        body.dark-mode .modal-content {
+            background-color: var(--dark-container-bg);
+            border: 1px solid rgba(80, 80, 80, 0.4);
+        }
+        body.dark-mode .modal h2 {
+            color: var(--dark-primary);
+        }
+        body.dark-mode .modal p {
+            color: var(--dark-text-light);
+        }
+        body.dark-mode .estacao-btn {
+            background-image: linear-gradient(to right, var(--dark-primary) 0%, var(--dark-primary-dark) 70%, var(--dark-primary) 100%);
+            color: var(--dark-bg);
+        }
+        body.dark-mode .estacao-btn:hover {
+            background-position: right center;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2);
+        }
+        body.dark-mode .estacao-btn::after {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        body.dark-mode .estacao-btn:nth-child(even) {
+            background-image: linear-gradient(to right, var(--color-accent) 0%, var(--color-accent-dark) 70%, var(--color-accent) 100%);
+            color: white;
+        }
+        body.dark-mode .dropdown-container .menu-toggle {
+            background-color: var(--dark-primary);
+            box-shadow: var(--box-shadow-medium);
+        }
+        body.dark-mode .dropdown-container .menu-toggle:hover {
+            background-color: var(--dark-primary-dark);
+        }
+        body.dark-mode .menu-content {
+            background-color: var(--dark-menu-bg);
+            box-shadow: var(--box-shadow-strong);
+        }
+        body.dark-mode .menu-item:hover {
+            background-color: var(--dark-menu-item-hover);
+        }
+        body.dark-mode .menu-item::before {
+            background-color: var(--dark-primary));
+        }
+        body.dark-mode .menu-icon, body.dark-mode .menu-title {
+            color: var(--dark-text);
+        }
+        body.dark-mode .dark-mode-toggle span {
+            color: var(--dark-text);
+        }
+        body.dark-mode .dark-mode-toggle:hover {
+            background-color: var(--dark-menu-item-hover);
+        }
+        body.dark-mode .toggle-switch .slider {
+            background-color: #666;
+        }
+        body.dark-mode input:checked + .slider {
+            background-color: var(--color-accent);
+        }
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .container { padding: 30px; max-width: 95%; }
+            h1#mainTitle { font-size: 2em; margin-bottom: 20px; }
+            input[type="text"] { padding: 15px 15px; font-size: 1em; }
+            .user-info, .message {
+                padding: 10px 15px;
+                font-size: 0.9em;
+            }
+            .modal-content {
+                padding: 25px;
+                max-width: 95%;
+            }
+            .modal h2 { font-size: 1.5em; }
+            .modal p { font-size: 0.95em; }
+            .estacao-btn { font-size: 0.95em; padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+<div id="dropdownContainer" class="dropdown-container">
+    <button id="menuToggle" class="menu-toggle">
+        <span>&#9776;</span>
+    </button>
+    <div id="menuContent" class="menu-content">
+        <label class="dark-mode-toggle dark-mode-toggle-corner">
+            <span>Dark Mode</span>
+            <span class="toggle-switch">
+                <input type="checkbox" id="darkModeToggle">
+                <span class="slider"></span>
+            </span>
+        </label>
+
+        <a href="Consulta.html" class="menu-item" title="Consultar Status">
+            <span class="menu-icon">&#128269;</span>
+            <span class="menu-title">Consulta</span>
+        </a>
+        <a href="Manutencao.html" class="menu-item" title="Modo Manutenção">
+            <span class="menu-icon">&#128736;</span>
+            <span class="menu-title">Manutenção</span>
+        </a>
+        <a href="Treinamento.html" class="menu-item" title="Modo Treinamento">
+            <span class="menu-icon">&#128218;</span>
+            <span class="menu-title">Treinamento</span>
+        </a>
+        <a href="Dashboard.html" target="_blank" class="menu-item" title="Abrir Dashboard">
+            <span class="menu-icon">&#128250;</span>
+            <span class="menu-title">Dash</span>
+        </a>
+    </div>
+</div>
+<div id="estacaoModal" class="modal">
+    <div class="modal-content">
+        <h2 id="estacaoModalTitulo">Selecione a Estação</h2>
+        <p id="estacaoModalTexto">Em qual estação você está operando?</p>
+        <button class="estacao-btn" onclick="selecionarEstacao('P-1-W')">Estação P-1-W</button>
+        <button class="estacao-btn" onclick="selecionarEstacao('P-1-P')">Estação P-1-P</button>
+    </div>
+</div>
+<div id="mainContent" class="hidden">
+    <div class="container">
+        <h1 id="mainTitle">Controle de Selecionadoras</h1>
+        <div class="scanner-area">
+            <div class="form-group" id="loginFormGroup">
+                <label for="login" id="loginLabel">LOGIN DO OPERADOR</label>
+                <input type="text" id="login" placeholder="Bipe o QR code do login" autofocus>
+            </div>
+            <div id="userDisplay" class="user-info hidden"></div>
+            <div class="form-group hidden" id="chaveFormGroup">
+                <label for="chave" id="chaveLabel">CHAVE DA MÁQUINA</label>
+                <input type="text" id="chave" placeholder="Bipe o QR code da máquina" maxlength="3" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            </div>
+            <div id="message" class="message hidden">
+                <span id="messageText"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // ADICIONE esta constante com a URL do seu Web App do Apps Script
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/SEU_ID_DO_SCRIPT/exec"; // <<-- SUBSTITUA ESTE ID!
+
+    let currentUser = null;
+    let estacaoSelecionada = localStorage.getItem('estacaoSelecionada');
+    const mainContent = document.getElementById('mainContent');
+    const loginInput = document.getElementById('login');
+    const chaveInput = document.getElementById('chave');
+    const userDisplay = document.getElementById('userDisplay');
+    const chaveFormGroup = document.getElementById('chaveFormGroup');
+    const messageDiv = document.getElementById('message');
+    const messageTextSpan = document.getElementById('messageText');
+    const estacaoModal = document.getElementById('estacaoModal');
+    const estacaoModalTitulo = document.getElementById('estacaoModalTitulo');
+    const estacaoModalTexto = document.getElementById('estacaoModalTexto');
+    const dropdownContainer = document.getElementById('dropdownContainer');
+    const menuToggle = document.getElementById('menuToggle');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // PWA: Registro do Service Worker e Manifest
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log("Service Worker registrado com sucesso em Index!"))
+                .catch(err => console.error("Erro ao registrar Service Worker em Index:", err));
+        }
+        // PWA: Referência ao manifest.json no HTML (importante para "Add to Home Screen")
+        const linkManifest = document.createElement('link');
+        linkManifest.rel = 'manifest';
+        linkManifest.href = 'manifest.json';
+        document.head.appendChild(linkManifest);
+
+
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.checked = true;
+        }
+
+        darkModeToggle.addEventListener('change', () => {
+            if (darkModeToggle.checked) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'false');
+            }
+        });
+
+        [loginInput, chaveInput].forEach(inputEl => {
+            if (inputEl) {
+                inputEl.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const valor = e.target.value.trim();
+                        if (!valor) {
+                            exibirMensagem("Por favor, insira um valor.", 'error');
+                            if (e.target.id === 'login') loginInput.classList.add('shake');
+                            else if (e.target.id === 'chave') chaveInput.classList.add('shake');
+                            setTimeout(() => {
+                                if (e.target.id === 'login') loginInput.classList.remove('shake');
+                                else if (e.target.id === 'chave') chaveInput.classList.remove('shake');
+                            }, 500);
+                            return;
+                        }
+                        if (e.target.id === 'login') processarLogin(valor);
+                        else if (e.target.id === 'chave' && currentUser) processarChaveNormal(valor);
+                    }
+                });
+            }
+        });
+
+        if (menuToggle && dropdownContainer) {
+            menuToggle.addEventListener('click', toggleDropdownMenu);
+        }
+
+        document.addEventListener('click', (event) => {
+            if (dropdownContainer.classList.contains('is-open') && !dropdownContainer.contains(event.target)) {
+                toggleDropdownMenu();
+            }
+        });
+
+        if (!estacaoSelecionada) {
+            hideElement(mainContent);
+            solicitarEstacaoOperador();
+        } else {
+            showElement(mainContent);
+            loginInput.focus();
+        }
+    });
+
+    function showElement(element) { if (element) element.classList.remove('hidden'); }
+    function hideElement(element) { if (element) element.classList.add('hidden'); }
+    function showModal(modalElement) { if (modalElement) { modalElement.style.display = 'flex'; setTimeout(() => { modalElement.classList.add('show'); }, 10); } }
+    function hideModal(modalElement) { if (modalElement) { modalElement.classList.remove('show'); setTimeout(() => { modalElement.style.display = 'none'; }, 400); } }
+
+    function toggleDropdownMenu() {
+        dropdownContainer.classList.toggle('is-open');
+        const is_open = dropdownContainer.classList.contains('is-open');
+        menuToggle.querySelector('span').innerHTML = is_open ? '&#10005;' : '&#9776;';
+    }
+
+    function solicitarEstacaoOperador() {
+        if (!estacaoModal) return;
+        estacaoModalTitulo.textContent = "Bem-vindo! Selecione sua Estação";
+        estacaoModalTexto.textContent = "Esta estação será lembrada para futuras sessões.";
+        showModal(estacaoModal);
+    }
+
+    function selecionarEstacao(estacao) {
+        hideModal(estacaoModal);
+        estacaoSelecionada = estacao;
+        localStorage.setItem('estacaoSelecionada', estacao);
+        showElement(mainContent);
+        loginInput.focus();
+    }
+
+    async function processarLogin(login) {
+        if (!estacaoSelecionada) {
+            solicitarEstacaoOperador();
+            exibirMensagem("Selecione sua estação de operação.", 'error');
+            return;
+        }
+        exibirMensagem("Verificando login...", "info", true);
+
+        try {
+            const response = await fetch(`${APPS_SCRIPT_URL}?action=verificarLogin&userLogin=${encodeURIComponent(login)}`);
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+            const data = await response.json();
+
+            hideElement(messageDiv);
+            if (data.success) {
+                currentUser = data.data;
+                mostrarUsuario(currentUser.nome);
+            } else {
+                exibirMensagem(data.message, 'error');
+                loginInput.classList.add('shake');
+                setTimeout(() => loginInput.classList.remove('shake'), 500);
+                limparCampo('login');
+            }
+        } catch (err) {
+            handleServerError(err);
+        }
+    }
+
+    async function processarChaveNormal(chave) {
+        exibirMensagem("Registrando ação...", "info", true); // Adicionado feedback
+        try {
+            const response = await fetch(`${APPS_SCRIPT_URL}?action=registrarAcao&idMaq=${encodeURIComponent(chave)}&userLogin=${encodeURIComponent(currentUser.login)}&estacao=${encodeURIComponent(estacaoSelecionada)}`);
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+            const data = await response.json();
+            handleServerResponse(data);
+        } catch (err) {
+            handleServerError(err);
+            chaveInput.classList.add('shake');
+            setTimeout(() => chaveInput.classList.remove('shake'), 500);
+            limparCampo('chave');
+        }
+    }
+
+    function handleServerResponse(response) {
+        exibirMensagem(response.message, response.success ? 'success' : 'error');
+        if (response.success) {
+            messageDiv.classList.add('cooldown-success');
+        } else {
+            messageDiv.classList.add('cooldown-error');
+            messageDiv.classList.add('shake');
+            setTimeout(() => messageDiv.classList.remove('shake'), 500);
+        }
+        setTimeout(resetarFormulario, 3500);
+    }
+
+    function handleServerError(err) {
+        exibirMensagem(`Erro de comunicação: ${err.message}`, 'error');
+        messageDiv.classList.add('shake');
+        setTimeout(() => messageDiv.classList.remove('shake'), 500);
+        console.error("Erro no fetch:", err);
+    }
+
+    function exibirMensagem(texto, tipo, isTemporary = false) {
+        messageDiv.className = 'message';
+        messageDiv.classList.add(tipo);
+        messageTextSpan.textContent = texto;
+        showElement(messageDiv);
+        if (!isTemporary && (tipo === 'success' || tipo === 'error')) {
+            // Mensagens não temporárias (sucesso/erro) não se fecham automaticamente aqui.
+        } else if (isTemporary) {
+            setTimeout(() => { if (messageTextSpan.textContent === texto) hideElement(messageDiv); }, 3000);
+        }
+    }
+
+    function mostrarUsuario(nome) {
+        if (!userDisplay) return;
+        const primeiroNome = nome ? nome.split(' ')[0] : 'Operador';
+        userDisplay.innerHTML = `👋 Olá, <strong> ${primeiroNome} </strong>!`;
+        showElement(userDisplay);
+        showElement(chaveFormGroup);
+        if (chaveInput) chaveInput.focus();
+    }
+
+    function limparCampo(id) { if (document.getElementById(id)) document.getElementById(id).value = ''; }
+
+    function resetarFormulario() {
+        limparCampo('login');
+        limparCampo('chave');
+        currentUser = null;
+        hideElement(messageDiv);
+        hideElement(chaveFormGroup);
+        hideElement(userDisplay);
+        messageDiv.classList.remove('cooldown-success', 'cooldown-error');
+        loginInput.focus();
+    }
+</script>
+</body>
+</html>

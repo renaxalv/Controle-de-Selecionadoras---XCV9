@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Status</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        :root {
+            --color-primary: #F5B041;
+            --color-primary-dark: #D68910;
+            --color-accent: #5DADE2;
+            --color-accent-dark: #3498DB;
+            --color-text: #2C3E50;
+            --color-text-light: #7F8C8D;
+            --color-bg: #EAECEE;
+            --color-container-bg: rgba(255, 255, 255, 0.8);
+            --color-success: #2ecc71;
+            --color-error: #e74c3c;
+            --border-radius-md: 10px;
+            --border-radius-lg: 15px;
+            --box-shadow-soft: 0 4px 10px rgba(0, 0, 0, 0.08);
+            --box-shadow-medium: 0 10px 30px rgba(0, 0, 0, 0.15);
+            --box-shadow-strong: 0 15px 40px rgba(0, 0, 0, 0.2);
+            --glass-blur: 8px;
+            /* Dark Mode General Colors (Ajustado para maior contraste no gradiente) */
+            --dark-bg: #1A2127;
+            --dark-bg-end: #2F3943;
+            --dark-container-bg: rgba(43, 53, 62, 0.7);
+            --dark-text: #E0E0E0;
+            --dark-text-light: #A0A0A0;
+            --dark-input-bg: #37414A;
+            --dark-input-border: #55606A;
+            --dark-info-bg: rgba(55, 65, 74, 0.7);
+            --dark-info-text: #F5B041;
+            --dark-success: #87E0A8;
+            --dark-error: #FF8F82;
+            /* Consulta Page Specific Dark Mode Primary Colors (Blue) */
+            --dark-consulta-primary: #5DADE2;
+            --dark-consulta-primary-dark: #3498DB;
+        }
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: linear-gradient(45deg, #CFE8FF, #A7D9EE);
+            background-size: 200% 200%;
+            animation: gradientAnimation 10s ease infinite;
+            color: var(--color-text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 30px;
+            box-sizing: border-box;
+            overflow: hidden;
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+        /* Dark Mode Specific Styles for Consulta Page (Atualizado o background) */
+        body.dark-mode {
+            background: linear-gradient(45deg, var(--dark-bg), var(--dark-bg-end));
+            background-size: 200% 200%;
+            animation: gradientAnimation 10s ease infinite;
+            color: var(--dark-text);
+        }
+        body.dark-mode .container {
+            background: var(--dark-container-bg);
+            border: 1px solid rgba(80, 80, 80, 0.4);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        body.dark-mode h1 {
+            color: var(--dark-consulta-primary);
+        }
+        body.dark-mode h1::after {
+            background-color: var(--dark-consulta-primary-dark);
+        }
+        body.dark-mode .search-group::before {
+            color: var(--dark-text-light);
+        }
+        body.dark-mode input {
+            background-color: var(--dark-input-bg);
+            border-color: var(--dark-input-border);
+            color: var(--dark-text);
+        }
+        body.dark-mode input:focus {
+            border-color: var(--dark-consulta-primary);
+            box-shadow: 0 0 10px rgba(93, 173, 230, 0.5);
+        }
+        body.dark-mode #resultArea.success {
+            background-color: rgba(46, 204, 113, 0.1);
+            border-color: var(--dark-success);
+            box-shadow: 0 5px 20px rgba(46, 204, 113, 0.4);
+        }
+        body.dark-mode #resultArea.error {
+            background-color: rgba(231, 76, 60, 0.1);
+            border-color: var(--dark-error);
+            box-shadow: 0 5px 20px rgba(231, 76, 60, 0.4);
+        }
+        body.dark-mode #resultArea strong {
+            color: var(--dark-text);
+        }
+        body.dark-mode #resultArea hr {
+            border-top: 1px dashed var(--dark-input-border);
+        }
+        body.dark-mode #resultArea .horas-titulo {
+            color: var(--dark-consulta-primary);
+        }
+        body.dark-mode #resultArea .horas-titulo::before {
+            color: var(--dark-consulta-primary);
+        }
+        body.dark-mode #resultArea .horas-item::before {
+            color: var(--dark-consulta-primary);
+        }
+        body.dark-mode .loader {
+            border-top: 5px solid var(--dark-consulta-primary);
+        }
+        body.dark-mode .back-button-fab {
+            background-color: var(--dark-consulta-primary);
+            box-shadow: 0 6px 15px rgba(93, 173, 230, 0.3);
+        }
+        body.dark-mode .back-button-fab:hover {
+            background-color: var(--dark-consulta-primary-dark);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.5);
+        }
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .container {
+            background: var(--color-container-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            padding: 50px;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--box-shadow-medium);
+            width: 100%;
+            max-width: 550px;
+            text-align: center;
+            transform: translateY(-20px);
+            opacity: 0;
+            animation: slideUp 0.6s 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            position: relative;
+            transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+        @keyframes slideUp {
+            to { transform: translateY(0); opacity: 1; }
+        }
+        h1 {
+            color: var(--color-accent);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            position: relative;
+            animation: fadeInText 1s ease-out forwards;
+            transition: color 0.5s ease;
+        }
+        @keyframes fadeInText {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h1::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background-color: var(--color-accent-dark);
+            margin: 15px auto 0;
+            border-radius: 2px;
+            transform: scaleX(0);
+            animation: expandLine 1s ease-out 0.8s forwards;
+            transition: background-color 0.5s ease;
+        }
+        @keyframes expandLine {
+            to { transform: scaleX(1); }
+        }
+        .search-group {
+            position: relative;
+            margin-bottom: 30px;
+            animation: fadeInElement 0.6s ease-out 0.6s forwards;
+            opacity: 0;
+        }
+        @keyframes fadeInElement {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        input {
+            width: 100%;
+            padding: 18px 20px 18px 50px;
+            font-size: 1.1em;
+            border: 2px solid #D5DBDB;
+            border-radius: var(--border-radius-md);
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            text-align: left;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--color-text);
+        }
+        input::placeholder {
+            color: var(--color-text-light);
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+        input:focus::placeholder {
+            opacity: 0.5;
+        }
+        input:focus {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 10px rgba(93, 173, 230, 0.5);
+            outline: none;
+            transform: translateY(-2px);
+        }
+        .search-group::before {
+            content: '🔍';
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-text-light);
+            font-size: 1.2em;
+            pointer-events: none;
+            opacity: 0.7;
+            transition: color 0.3s ease, opacity 0.3s ease;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        #resultArea {
+            margin-top: 40px;
+            padding: 30px;
+            border-radius: var(--border-radius-md);
+            text-align: left;
+            line-height: 1.8;
+            font-size: 1.05em;
+            display: none;
+            width: 100%;
+            max-width: 550px;
+            box-sizing: border-box;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInSlideUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            border-width: 2px;
+            border-style: solid;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        @keyframes fadeInSlideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #resultArea.success {
+            background-color: rgba(46, 204, 113, 0.1);
+            border-color: var(--color-success);
+            box-shadow: 0 5px 20px rgba(46, 204, 113, 0.4);
+        }
+        #resultArea.error {
+            background-color: rgba(231, 76, 60, 0.1);
+            border-color: var(--color-error);
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(231, 76, 60, 0.4);
+        }
+        #resultArea p {
+            margin: 10px 0;
+        }
+        #resultArea strong {
+            color: var(--color-text);
+            font-weight: 600;
+        }
+        #resultArea hr {
+            border: none;
+            border-top: 1px dashed #ccc;
+            margin: 20px 0;
+        }
+        #resultArea .horas-titulo {
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            color: var(--color-accent-dark);
+            position: relative;
+            padding-left: 25px;
+        }
+        #resultArea .horas-titulo::before {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+            color: var(--color-accent);
+        }
+        #resultArea .horas-item {
+            padding-left: 25px;
+            position: relative;
+        }
+        #resultArea .horas-item::before {
+            content: '•';
+            position: absolute;
+            left: 10px;
+            color: var(--color-accent);
+        }
+        .loader-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 40px;
+            opacity: 0;
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--color-accent);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 0.8s linear infinite;
+            box-shadow: var(--box-shadow-soft);
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .back-button-fab {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 65px;
+            height: 65px;
+            background-color: var(--color-accent);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2em;
+            cursor: pointer;
+            box-shadow: var(--box-shadow-medium);
+            transition: all 0.3s ease;
+            z-index: 1001;
+            text-decoration: none;
+            line-height: 1;
+            animation: float 3s ease-in-out infinite;
+            overflow: hidden;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .back-button-fab:hover {
+            background-color: var(--color-accent-dark);
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: var(--box-shadow-strong);
+            animation: none;
+        }
+        .back-button-fab:active {
+            transform: scale(0.95);
+            box-shadow: var(--box-shadow-soft);
+        }
+        .back-button-fab::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(1) translate(-50%, -50%);
+            transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+        }
+        .back-button-fab:hover::after {
+            transform: scale(80) translate(-50%, -50%);
+            opacity: 1;
+        }
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .container { padding: 30px; max-width: 95%; }
+            h1 { font-size: 2em; margin-bottom: 20px; }
+            input { padding: 15px 15px 15px 45px; font-size: 1em; }
+            .search-group::before { left: 15px; font-size: 1.1em; }
+            #resultArea {
+                padding: 20px;
+                font-size: 0.95em;
+                max-width: 95%;
+                word-wrap: break-word;
+            }
+            #resultArea p, #resultArea strong, #resultArea .horas-titulo, #resultArea .horas-item {
+                font-size: 0.9em;
+                margin: 6px 0;
+            }
+            .back-button-fab {
+                width: 55px;
+                height: 55px;
+                font-size: 1.8em;
+                bottom: 20px;
+                left: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a class="back-button-fab" href="index.html" title="Voltar ao Check-in">&#8629;</a>
+    <div class="container">
+        <h1>🔍 Consulta Rápida</h1>
+        <div class="search-group">
+            <input type="text" id="termoInput" placeholder="Nº da Máquina ou Login do Usuário" autofocus>
+        </div>
+    </div>
+    <div id="loaderContainer" class="loader-container" style="display: none;">
+        <div id="loader" class="loader"></div>
+    </div>
+    <div id="resultArea"></div>
+    <script>
+        // ADICIONE esta constante com a URL do seu Web App do Apps Script
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/SEU_ID_DO_SCRIPT/exec"; // <<-- SUBSTITUA ESTE ID!
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+            }
+
+            // Registro do Service Worker e Manifest (ADICIONADO)
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js')
+                    .then(() => console.log("Service Worker registrado com sucesso em Consulta!"))
+                    .catch(err => console.error("Erro ao registrar Service Worker em Consulta:", err));
+            }
+            // Não precisa de link rel="manifest" aqui se o service worker já estiver cuidando do cache do manifest,
+            // mas é boa prática ter ambos para garantir compatibilidade e descoberta.
+            // <link rel="manifest" href="manifest.json"> seria adicionado no HEAD
+            // Para simplicidade, vou manter apenas o SW aqui, assumindo que manifest.json está no cache.
+        });
+
+        const termoInput = document.getElementById('termoInput');
+        const resultArea = document.getElementById('resultArea');
+        const loaderContainer = document.getElementById('loaderContainer');
+        const loader = document.getElementById('loader');
+
+        function formatarHorasEMinutos(horasDecimais) {
+            const valor = parseFloat(horasDecimais) || 0;
+            if (valor === 0) return "0 minutos";
+            const totalMinutos = Math.round(valor * 60);
+            const horas = Math.floor(totalMinutos / 60);
+            const minutos = totalMinutos % 60;
+            const partes = [];
+            if (horas > 0) { partes.push(`${horas} ${horas === 1 ? 'hora' : 'horas'}`); }
+            if (minutos > 0) { partes.push(`${minutos} ${minutos === 1 ? 'minuto' : 'minutos'}`); }
+            return partes.join(' e ');
+        }
+
+        function consultar() {
+            const termo = termoInput.value.trim();
+            if (!termo) {
+                loaderContainer.style.display = 'none';
+                resultArea.textContent = "Por favor, insira um termo para a busca.";
+                resultArea.className = 'error';
+                resultArea.style.display = 'block';
+                resultArea.classList.add('shake');
+                setTimeout(() => resultArea.classList.remove('shake'), 500);
+                return;
+            }
+
+            loaderContainer.style.display = 'flex';
+            resultArea.style.display = 'none';
+            resultArea.classList.remove('success', 'error');
+
+            // Mude de google.script.run para fetch
+            fetch(`${APPS_SCRIPT_URL}?action=consultarStatus&termo=${encodeURIComponent(termo)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Erro HTTP: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(response => { // Renomeado 'data' para 'response' para manter consistência com o GAS
+                    loaderContainer.style.display = 'none';
+                    if (response.success) {
+                        const data = response.data; // Acessa 'data' dentro do objeto de resposta
+                        let html = '';
+                        if (data.maquina) { html += `<p><strong>Máquina:</strong> ${data.maquina}</p>`; }
+                        if (data.status) { html += `<p><strong>Status:</strong> ${data.status}</p>`; }
+                        if (data.estacao) {
+                            html += `<p><strong>Localização:</strong> ${data.estacao}</p>`;
+                        }
+                        if (data.usuario && data.lider) {
+                            html += `<p><strong>Usuário:</strong> ${data.usuario}</p>`;
+                            html += `<p><strong>Líder do Usuário:</strong> ${data.lider}</p>`;
+                            html += `<p><strong>Setor do Usuário:</strong> ${data.setor}</p>`;
+                        } else if (data.usuario) {
+                            html += `<p><strong>Usuário:</strong> ${data.usuario}</p>`;
+                        }
+                        if (data.ultimoUsuario) {
+                            html += `<p><strong>Último Usuário:</strong> ${data.ultimoUsuario}</p>`;
+                            html += `<p><strong>Devolvido em:</strong> ${data.dataDevolucao}</p>`;
+                        }
+                        if (data.horas) {
+                            if (html !== '') { html += `<hr>`; }
+                            html += `<p class="horas-titulo">Horas de Uso (Exposição):</p>`;
+                            html += `<p class="horas-item">- Hoje: <strong>${formatarHorasEMinutos(data.horas.hoje)}</strong></p>`;
+                            html += `<p class="horas-item">- Esta Semana: <strong>${formatarHorasEMinutos(data.horas.semana)}</strong></p>`;
+                            html += `<p class="horas-item">- Este Mês: <strong>${formatarHorasEMinutos(data.horas.mes)}</strong></p>`;
+                            html += `<p class="horas-item">- Total: <strong>${formatarHorasEMinutos(data.horas.total)}</strong></p>`;
+                        }
+                        resultArea.innerHTML = html;
+                        resultArea.className = 'success';
+                    } else {
+                        resultArea.textContent = response.message;
+                        resultArea.className = 'error';
+                    }
+                    resultArea.style.display = 'block';
+                })
+                .catch(err => {
+                    loaderContainer.style.display = 'none';
+                    resultArea.textContent = "Erro de comunicação com o servidor. Verifique sua conexão ou tente novamente.";
+                    resultArea.className = 'error';
+                    resultArea.style.display = 'block';
+                    resultArea.classList.add('shake');
+                    setTimeout(() => resultArea.classList.remove('shake'), 500);
+                    console.error("Erro no fetch:", err); // Para depuração
+                });
+        }
+        termoInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { consultar(); } });
+    </script>
+</body>
+</html>

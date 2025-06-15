@@ -1,0 +1,23 @@
+{
+  "name": "Meu PWA Completo",
+  "short_name": "PWA Teste",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#4285F4",
+  "theme_color": "#4285F4",
+  "description": "Aplicativo PWA de teste completo",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/renaxalv/pwa-assets-luft/main/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/renaxalv/pwa-assets-luft/main/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

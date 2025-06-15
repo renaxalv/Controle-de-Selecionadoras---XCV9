@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Empilhadeiras - Manutenção</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        :root {
+            /* Light Mode Colors (Base Vermelha para Manutenção) */
+            --color-primary: #E74C3C; /* Vermelho principal */
+            --color-primary-dark: #C0392B; /* Vermelho mais escuro */
+            --color-accent: #F5B041; /* Mantendo o laranja como accent secundário se necessário */
+            --color-accent-dark: #D68910;
+            --color-success: #7DCEA0;
+            --color-error: #EC7063;
+            --color-info-bg: #FDEBD0; /* Alterado para combinar com info-text laranja */
+            --color-info-text: #AF6418; /* Laranja para textos de informação */
+            --color-text: #2C3E50;
+            --color-text-light: #7F8C8D;
+            --color-bg: #F4F6F6;
+            --color-container-bg: rgba(255, 255, 255, 0.8);
+            --border-radius-md: 8px;
+            --border-radius-lg: 12px;
+            --box-shadow-soft: 0 4px 10px rgba(0, 0, 0, 0.08);
+            --box-shadow-medium: 0 10px 30px rgba(0, 0, 0, 0.15);
+            --box-shadow-strong: 0 15px 40px rgba(0, 0, 0, 0.2);
+            --glass-blur: 8px;
+
+            /* Dark Mode Colors (Gradiente e Primary ajustados para Vermelho) */
+            --dark-bg: #1A2127; /* Tom mais escuro para o início do gradiente */
+            --dark-bg-end: #2F3943; /* Tom mais claro para o fim do gradiente */
+            --dark-container-bg: rgba(43, 53, 62, 0.7);
+            --dark-text: #E0E0E0;
+            --dark-text-light: #A0A0A0;
+            --dark-input-bg: #37414A;
+            --dark-input-border: #55606A;
+            --dark-info-bg: rgba(55, 65, 74, 0.7);
+            --dark-info-text: #F5B041;
+            --dark-success: #87E0A8;
+            --dark-error: #FF8F82;
+
+            /* Manutenção Page Specific Dark Mode Primary Colors (Vermelho) */
+            --dark-manutencao-primary: #FF7B72; /* Vermelho mais claro para o dark mode */
+            --dark-manutencao-primary-dark: #E74C3C; /* Vermelho principal para dark mode (igual ao light) */
+        }
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: linear-gradient(45deg, #FFDADA, #FFCCCC); /* Gradiente vermelho claro e perceptível */
+            background-size: 200% 200%;
+            animation: gradientAnimation 10s ease infinite;
+            color: var(--color-text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 30px;
+            box-sizing: border-box;
+            overflow: hidden;
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+        body.dark-mode {
+            background: linear-gradient(45deg, var(--dark-bg), var(--dark-bg-end));
+            background-size: 200% 200%;
+            animation: gradientAnimation 10s ease infinite;
+            color: var(--dark-text);
+        }
+        body.dark-mode .container {
+            background: var(--dark-container-bg);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(80, 80, 80, 0.4);
+        }
+        body.dark-mode h1#mainTitle {
+            color: var(--dark-manutencao-primary); /* Usa o vermelho do dark mode */
+        }
+        body.dark-mode h1#mainTitle::after {
+            background-color: var(--dark-manutencao-primary-dark); /* Usa o vermelho mais escuro do dark mode */
+        }
+        body.dark-mode .scanner-area {
+            background: var(--dark-input-bg);
+            border-color: var(--dark-input-border);
+        }
+        body.dark-mode .scanner-area::before {
+            background: linear-gradient(to right, transparent, var(--dark-manutencao-primary), transparent); /* Usa o vermelho do dark mode */
+        }
+        body.dark-mode label {
+            color: var(--dark-text-light);
+        }
+        body.dark-mode label::before {
+            filter: brightness(1.5);
+        }
+        body.dark-mode input[type="text"], body.dark-mode textarea {
+            background-color: var(--dark-input-bg);
+            border-color: var(--dark-input-border);
+            color: var(--dark-text);
+        }
+        body.dark-mode input[type="text"]:focus, body.dark-mode textarea:focus {
+            border-color: var(--dark-manutencao-primary); /* Usa o vermelho do dark mode */
+            box-shadow: 0 0 0 4px rgba(255, 123, 114, 0.2); /* Sombra correspondente ao vermelho do dark mode */
+        }
+        body.dark-mode .message.success {
+            background: rgba(102, 255, 153, 0.1);
+            color: var(--dark-success);
+            border-color: var(--dark-success);
+        }
+        body.dark-mode .message.success::after { background-color: var(--dark-success); }
+        body.dark-mode .message.error {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--dark-error);
+            border-color: var(--dark-error);
+        }
+        body.dark-mode .message.error::after { background-color: var(--dark-error); }
+        body.dark-mode .message.info {
+            background: var(--dark-info-bg);
+            color: var(--dark-info-text);
+            border: 1px solid var(--dark-info-text);
+        }
+        body.dark-mode .message.info::before { content: '🔍'; }
+        body.dark-mode #submitManutencaoBtn, body.dark-mode .estacao-btn-maint {
+            background-image: linear-gradient(to right, var(--dark-manutencao-primary) 0%, var(--dark-manutencao-primary-dark) 70%, var(--dark-manutencao-primary) 100%);
+            color: var(--dark-bg);
+            box-shadow: 0 4px 15px rgba(255, 123, 114, 0.1); /* Sombra correspondente ao vermelho do dark mode */
+        }
+        body.dark-mode #submitManutencaoBtn:hover, body.dark-mode .estacao-btn-maint:hover {
+            background-position: right center;
+            transform: translateY(-2px);
+        }
+        body.dark-mode .estacao-btn-maint::after, body.dark-mode #submitManutencaoBtn::after {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        body.dark-mode .maintenance-tool-button {
+            background-color: var(--dark-manutencao-primary); /* Usa o vermelho do dark mode */
+            color: var(--dark-bg);
+        }
+        body.dark-mode .maintenance-tool-button:hover {
+            background-color: var(--dark-manutencao-primary-dark); /* Usa o vermelho mais escuro do dark mode */
+        }
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes slideUp {
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeInText {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes expandLine {
+            to { transform: scaleX(1); }
+        }
+        .container {
+            background: var(--color-container-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            padding: 50px;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--box-shadow-medium);
+            width: 100%;
+            max-width: 550px;
+            text-align: center;
+            transform: translateY(-20px);
+            opacity: 0;
+            animation: slideUp 0.6s 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            z-index: 10;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            position: relative;
+            transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+        h1#mainTitle {
+            color: var(--color-primary); /* Usa a cor primária vermelha */
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 2.5em;
+            letter-spacing: -0.5px;
+            position: relative;
+            animation: fadeInText 1s ease-out forwards;
+            transition: color 0.5s ease;
+        }
+        h1#mainTitle::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background-color: var(--color-primary-dark); /* Usa a cor primária escura vermelha */
+            margin: 15px auto 0;
+            border-radius: 2px;
+            transform: scaleX(0);
+            animation: expandLine 1s ease-out 0.8s forwards;
+            transition: background-color 0.5s ease;
+        }
+        .scanner-area {
+            background: #FBFCFC;
+            padding: 25px;
+            border-radius: var(--border-radius-md);
+            margin-bottom: 25px;
+            border: 1px solid #EAECEE;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInElement 0.6s ease-out 0.6s forwards;
+            opacity: 0;
+            transition: background 0.5s ease, border-color 0.5s ease;
+        }
+        .scanner-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, transparent, var(--color-primary), transparent); /* Usa a cor primária vermelha */
+            animation: scanLine 3s infinite linear;
+            opacity: 0.7;
+            z-index: 1;
+        }
+        @keyframes scanLine {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .form-group {
+            margin-bottom: 22px;
+        }
+        @keyframes fadeInElement {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .hidden { display: none !important; }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--color-text-light);
+            font-size: 0.9em;
+            position: relative;
+            padding-left: 25px;
+            transition: color 0.5s ease;
+        }
+        label::before {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+        }
+        #chaveLabel::before { content: '🔑'; }
+        #problemaDetectadoLabel::before { content: '📝'; }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 18px 20px;
+            font-size: 1.1em;
+            border: 2px solid #D5DBDB;
+            border-radius: var(--border-radius-md);
+            box-sizing: border-box;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--color-text);
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+        textarea { min-height: 80px; resize: vertical; }
+        input[type="text"]:focus, textarea:focus {
+            border-color: var(--color-primary); /* Usa a cor primária vermelha */
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.5); /* Sombra correspondente ao vermelho */
+            outline: none;
+            transform: translateY(-2px);
+        }
+        .message {
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: var(--border-radius-md);
+            font-weight: 500;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+        }
+        .message::before { font-size: 1.3em; margin-right: 10px; }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+        .message.success { background: #D5F5E3; color: #1D8348; border: 1px solid var(--color-success); }
+        .message.success::before { content: '✅'; }
+        .message.error { background: #FADBD8; color: #C0392B; border: 1px solid var(--color-error); }
+        .message.error::before { content: '❌'; }
+        .message.info { background-color: var(--color-info-bg); color: var(--color-info-text); border: 1px solid var(--color-info-text); }
+        .message.info::before { content: '🔍'; }
+        @keyframes shrink-right-to-left { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+        .message::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 5px;
+            width: 100%;
+            transform-origin: left;
+            transition: background-color 0.5s ease;
+        }
+        .message.cooldown-success::after { background-color: var(--color-success); animation: shrink-right-to-left 3.5s linear forwards; }
+        .message.cooldown-error::after { background-color: var(--color-error); animation: shrink-right-to-left 3.5s linear forwards; }
+        #submitManutencaoBtn, .estacao-btn-maint {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 1.05em;
+            font-weight: 600;
+            background-image: linear-gradient(to right, var(--color-primary) 0%, var(--color-primary-dark) 70%, var(--color-primary) 100%); /* Usa o gradiente vermelho */
+            background-size: 200% auto;
+            color: white;
+            border: none;
+            border-radius: var(--border-radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--box-shadow-soft);
+            position: relative;
+            overflow: hidden;
+        }
+        .estacao-btn-maint { margin-bottom: 10px; }
+        #submitManutencaoBtn:hover, .estacao-btn-maint:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--box-shadow-medium);
+            background-position: right center;
+        }
+        #submitManutencaoBtn:active, .estacao-btn-maint:active { transform: translateY(0); box-shadow: var(--box-shadow-soft); }
+        .estacao-btn-maint::after, #submitManutencaoBtn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(1) translate(-50%, -50%);
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        }
+        .estacao-btn-maint:hover::after, #submitManutencaoBtn:hover::after {
+            transform: scale(20) translate(-50%, -50%);
+            opacity: 1;
+        }
+        .maintenance-tool-button {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 65px;
+            height: 65px;
+            background-color: var(--color-primary); /* Usa a cor primária vermelha */
+            color: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2em;
+            cursor: pointer;
+            box-shadow: var(--box-shadow-medium);
+            transition: all 0.3s ease;
+            z-index: 1001;
+            text-decoration: none;
+            line-height: 1;
+            animation: float 3s ease-in-out infinite;
+            overflow: hidden;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .maintenance-tool-button:hover {
+            background-color: var(--color-primary-dark); /* Usa a cor primária escura vermelha */
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: var(--box-shadow-strong);
+            animation: none;
+        }
+        .maintenance-tool-button:active {
+            transform: scale(0.95);
+            box-shadow: var(--box-shadow-soft);
+        }
+        .maintenance-tool-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(1) translate(-50%, -50%);
+            transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+        }
+        .maintenance-tool-button:hover::after {
+            transform: scale(80) translate(-50%, -50%);
+            opacity: 1;
+        }
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .container { padding: 30px; max-width: 95%; }
+            h1#mainTitle { font-size: 2em; margin-bottom: 20px; }
+            input[type="text"], textarea { padding: 15px 15px; font-size: 1em; }
+            .message {
+                padding: 10px 15px;
+                font-size: 0.9em;
+            }
+            #submitManutencaoBtn, .estacao-btn-maint { font-size: 0.95em; padding: 12px; }
+            .maintenance-tool-button {
+                width: 55px;
+                height: 55px;
+                font-size: 1.8em;
+                bottom: 20px;
+                left: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="mainTitle">🛠️ Modo Manutenção 🛠️</h1>
+        <div class="scanner-area">
+            <div class="form-group" id="chaveFormGroup">
+                <label for="chave" id="chaveLabel">CHAVE DA MÁQUINA:</label>
+                <input type="text" id="chave" placeholder="Bipe o QR code da máquina" maxlength="3" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            </div>
+            <div class="form-group hidden" id="localizacaoFormGroup">
+                <label for="problemaDetectado" id="localizacaoLabel">ONDE A MÁQUINA ESTÁ LOCALIZADA?</label>
+                <button class="estacao-btn-maint" onclick="selecionarLocalizacao('P-1-W')">P-1-W</button>
+                <button class="estacao-btn-maint" onclick="selecionarLocalizacao('P-1-P')">P-1-P</button>
+            </div>
+            <div class="form-group hidden" id="problemaFormGroup">
+                <label for="problemaDetectado" id="problemaDetectadoLabel">PROBLEMA DETECTADO:</label>
+                <textarea id="problemaDetectado" placeholder="Descreva o problema (opcional)"></textarea>
+            </div>
+            <button id="submitManutencaoBtn" class="hidden">Enviar para Manutenção</button>
+            <div class="form-group hidden" id="estacaoDevolucaoGroup">
+                <label>Máquina em Manutenção. Onde disponibilizar?</label>
+                <button class="estacao-btn-maint" onclick="disponibilizarMaquina('P-1-W')">Disponibilizar em P-1-W</button>
+                <button class="estacao-btn-maint" onclick="disponibilizarMaquina('P-1-P')">Disponibilizar em P-1-P</button>
+            </div>
+            <div id="message" class="message hidden">
+                <span id="messageText"></span>
+            </div>
+        </div>
+    </div>
+    <a class="maintenance-tool-button" href="index.html" title="Voltar para Operação">&#8629;</a>
+    <script>
+        // ADICIONE esta constante com a URL do seu Web App do Apps Script
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/SEU_ID_DO_SCRIPT/exec"; // <<-- SUBSTITUA ESTE ID!
+
+        let maquinaCache = null;
+        let localizacaoSelecionada = null;
+        const chaveInput = document.getElementById('chave');
+        const localizacaoFormGroup = document.getElementById('localizacaoFormGroup');
+        const problemaFormGroup = document.getElementById('problemaFormGroup');
+        const problemaDetectadoInput = document.getElementById('problemaDetectado');
+        const submitManutencaoBtn = document.getElementById('submitManutencaoBtn');
+        const estacaoDevolucaoGroup = document.getElementById('estacaoDevolucaoGroup');
+        const messageDiv = document.getElementById('message');
+        const messageTextSpan = document.getElementById('messageText');
+        const STATUS_MANUTENCAO_CLIENTE = "MANUTENÇÃO"; // Mantido para lógica do cliente
+        const STATUS_EM_USO_CLIENTE = "EM USO"; // Mantido para lógica do cliente
+        const STATUS_TREINAMENTO_CLIENTE = "TREINAMENTO"; // Mantido para lógica do cliente
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+            }
+
+            // Registro do Service Worker e Manifest (ADICIONADO)
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js')
+                    .then(() => console.log("Service Worker registrado com sucesso em Manutenção!"))
+                    .catch(err => console.error("Erro ao registrar Service Worker em Manutenção:", err));
+            }
+
+            chaveInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const valor = e.target.value.trim();
+                    if(!valor) {
+                        exibirMensagem("Por favor, insira um valor.", 'error');
+                        chaveInput.classList.add('shake');
+                        setTimeout(() => chaveInput.classList.remove('shake'), 500);
+                        return;
+                    }
+                    verificarChaveParaManutencao(valor);
+                }
+            });
+            submitManutencaoBtn.addEventListener('click', enviarParaManutencao);
+            chaveInput.focus();
+        });
+
+        async function verificarChaveParaManutencao(chave) {
+            maquinaCache = chave;
+            resetarSubCamposManutencao();
+            exibirMensagem(`Verificando status da ${chave}...`, "info", true);
+
+            try {
+                const response = await fetch(`${APPS_SCRIPT_URL}?action=getMaquinaStatus&idMaq=${encodeURIComponent(chave)}`);
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                const data = await response.json(); // A resposta é um objeto { success: boolean, status: string, message: string }
+
+                hideElement(messageDiv);
+                if (!data.success) { // Se a API retornar sucesso: false
+                    exibirMensagem(data.message, 'error');
+                    messageDiv.classList.add('shake');
+                    setTimeout(() => messageDiv.classList.remove('shake'), 500);
+                    return;
+                }
+
+                // Lógica baseada no status retornado pela API
+                if (data.status === STATUS_MANUTENCAO_CLIENTE) {
+                    showElement(estacaoDevolucaoGroup);
+                } else if (data.status === STATUS_EM_USO_CLIENTE || data.status === STATUS_TREINAMENTO_CLIENTE) {
+                    exibirMensagem(`Máquina ${chave} está em uso. Devolva-a no modo correspondente primeiro.`, 'error');
+                } else {
+                    showElement(localizacaoFormGroup);
+                }
+            } catch (err) {
+                handleServerError(err);
+            }
+        }
+
+        function selecionarLocalizacao(estacao) {
+            localizacaoSelecionada = estacao;
+            hideElement(localizacaoFormGroup);
+            showElement(problemaFormGroup);
+            showElement(submitManutencaoBtn);
+            problemaDetectadoInput.focus();
+        }
+
+        async function enviarParaManutencao() {
+            const chave = chaveInput.value.trim();
+            if (!chave) {
+                exibirMensagem("É necessário informar a chave da máquina.", 'error');
+                chaveInput.classList.add('shake');
+                setTimeout(() => chaveInput.classList.remove('shake'), 500);
+                return;
+            }
+            if (!localizacaoSelecionada) {
+                exibirMensagem("Por favor, selecione primeiro onde a máquina está localizada.", 'error');
+                return;
+            }
+            const problema = problemaDetectadoInput.value.trim();
+            exibirMensagem(`Enviando ${chave} para manutenção...`, "info", true);
+
+            try {
+                const response = await fetch(`${APPS_SCRIPT_URL}?action=manutencao&idMaq=${encodeURIComponent(chave)}&problema=${encodeURIComponent(problema)}&estacao=${encodeURIComponent(localizacaoSelecionada)}`);
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                const data = await response.json(); // A resposta é um objeto { success: boolean, message: string }
+                handleServerResponse(data);
+            } catch (err) {
+                handleServerError(err);
+            }
+        }
+
+        async function disponibilizarMaquina(estacao) {
+            if (!maquinaCache) return;
+            exibirMensagem(`Disponibilizando ${maquinaCache} na estação ${estacao}...`, "info", true);
+
+            try {
+                const response = await fetch(`${APPS_SCRIPT_URL}?action=disponibilizar&idMaq=${encodeURIComponent(maquinaCache)}&estacao=${encodeURIComponent(estacao)}`);
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                const data = await response.json(); // A resposta é um objeto { success: boolean, message: string }
+                handleServerResponse(data);
+            } catch (err) {
+                handleServerError(err);
+            }
+        }
+
+        function handleServerResponse(response) {
+            exibirMensagem(response.message, response.success ? 'success' : 'error');
+            if (response.success) {
+                messageDiv.classList.add('cooldown-success');
+            } else {
+                messageDiv.classList.add('cooldown-error');
+                messageDiv.classList.add('shake');
+                setTimeout(() => messageDiv.classList.remove('shake'), 500);
+            }
+            if(response.success) setTimeout(resetarFormulario, 3500);
+        }
+
+        function handleServerError(err) {
+            exibirMensagem(`Erro de comunicação: ${err.message}`, 'error');
+            messageDiv.classList.add('shake');
+            setTimeout(() => messageDiv.classList.remove('shake'), 500);
+            console.error("Erro no fetch:", err); // Para depuração
+        }
+
+        function exibirMensagem(texto, tipo, isTemporary = false) {
+            messageDiv.className = 'message';
+            messageDiv.classList.add(tipo);
+            messageTextSpan.textContent = texto;
+            showElement(messageDiv);
+            if (!isTemporary && (tipo === 'success' || tipo === 'error')) {
+                // Mensagens não temporárias (sucesso/erro) não se fecham automaticamente aqui.
+                // A classe cooldown-success/error adiciona a animação da barra.
+            } else if (isTemporary) {
+                setTimeout(() => {
+                    if (messageTextSpan.textContent === texto) { // Verifica se a mensagem ainda é a mesma antes de esconder
+                        hideElement(messageDiv);
+                        messageDiv.classList.remove('cooldown-success', 'cooldown-error'); // Garante que a animação seja removida
+                    }
+                }, 3000); // Esconde mensagens temporárias após 3 segundos
+            }
+        }
+
+        function showElement(element) {
+            if(element) {
+                element.classList.remove('hidden');
+            }
+        }
+
+        function hideElement(element) {
+            if(element) {
+                element.classList.add('hidden');
+            }
+        }
+
+        function resetarSubCamposManutencao() {
+            problemaDetectadoInput.value = '';
+            localizacaoSelecionada = null;
+            hideElement(localizacaoFormGroup);
+            hideElement(problemaFormGroup);
+            hideElement(submitManutencaoBtn);
+            hideElement(estacaoDevolucaoGroup);
+            messageDiv.classList.remove('cooldown-success', 'cooldown-error');
+        }
+
+        function resetarFormulario() {
+            chaveInput.value = '';
+            maquinaCache = null;
+            hideElement(messageDiv);
+            resetarSubCamposManutencao();
+            chaveInput.focus();
+        }
+    </script>
+</body>
+</html>
