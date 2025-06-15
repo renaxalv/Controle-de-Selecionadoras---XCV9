@@ -4,8 +4,8 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#4285F4",
-  "theme_color": "#4285F4",
+  "background_color": "#ffffff",
+  "theme_color": "#eb700c",
   "description": "Aplicativo para Controle de Máquinas em XCV9",
   "icons": [
     {
