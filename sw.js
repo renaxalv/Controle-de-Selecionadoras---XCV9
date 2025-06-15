@@ -3,14 +3,15 @@ const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  'https://raw.githubusercontent.com/renaxalv/pwa-assets-luft/main/icon-192.png',
-  'https://raw.githubusercontent.com/renaxalv/pwa-assets-luft/main/icon-512.png'
+  '/assets/icon-192.png', // <-- AGORA REFERENCIA A PASTA LOCAL ASSETS/
+  '/assets/icon-512.png'  // <-- AGORA REFERENCIA A PASTA LOCAL ASSETS/
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => cache.addAll(ASSETS_TO_CACHE))
+  ); // Corrigido o fechamento do parêntese aqui, se aplicável
 });
 
 self.addEventListener('fetch', (event) => {
