@@ -128,7 +128,7 @@
         }
         body.dark-mode .estacao-btn {
             background-image: linear-gradient(to right, var(--dark-primary) 0%, var(--dark-primary-dark) 70%, var(--dark-primary) 100%);
-            color: #FFF;
+            color: #FFF; /* Alterado para branco para melhor contraste no dark mode */
         }
         body.dark-mode .estacao-btn:hover {
             background-position: right center;
@@ -156,7 +156,7 @@
             background-color: var(--dark-menu-item-hover);
         }
         body.dark-mode .menu-item::before {
-            background-color: var(--dark-primary);
+            background-color: var(--dark-primary); /* Ajustado para usar a variável correta */
         }
         body.dark-mode .menu-icon, body.dark-mode .menu-title {
             color: var(--dark-text);
@@ -723,7 +723,7 @@
         }
         body.dark-mode .estacao-btn {
             background-image: linear-gradient(to right, var(--dark-primary) 0%, var(--dark-primary-dark) 70%, var(--dark-primary) 100%);
-            color: var(--dark-bg);
+            color: white; /* Alterado para branco para melhor contraste no dark mode */
         }
         body.dark-mode .estacao-btn:hover {
             background-position: right center;
@@ -751,7 +751,7 @@
             background-color: var(--dark-menu-item-hover);
         }
         body.dark-mode .menu-item::before {
-            background-color: var(--dark-primary));
+            background-color: var(--dark-primary);
         }
         body.dark-mode .menu-icon, body.dark-mode .menu-title {
             color: var(--dark-text);
@@ -848,7 +848,8 @@
 </div>
 <script>
     // ADICIONE esta constante com a URL do seu Web App do Apps Script
-    const APPS_SCRIPT_URL = "https://script.google.com/a/macros/luftsolutions.com.br/s/AKfycbwBuZxbkm19YpD1jV7WNNxD6f9j6Y_gb9n7umqXUqTUgq3cirTJ6dJ0g_FqmvjNgnTz/exec"; // <<-- SUBSTITUA ESTE ID!
+    // URL que você forneceu no início da conversa
+    const APPS_SCRIPT_URL = "https://script.google.com/a/macros/luftsolutions.com.br/s/AKfycbx4h8xExkZZTtNzvr-Yo0FC8z4Wcnhk7dCchxBIxWVXO2ggYrNWnQRSYlWNsEkDra_Q/exec";
 
     let currentUser = null;
     let estacaoSelecionada = localStorage.getItem('estacaoSelecionada');
