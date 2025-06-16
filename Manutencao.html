@@ -119,7 +119,7 @@
         body.dark-mode .message.info::before { content: '🔍'; }
         body.dark-mode #submitManutencaoBtn, body.dark-mode .estacao-btn-maint {
             background-image: linear-gradient(to right, var(--dark-manutencao-primary) 0%, var(--dark-manutencao-primary-dark) 70%, var(--dark-manutencao-primary) 100%);
-            color: var(--dark-bg);
+            color: #FFF; /* Alterado para branco para melhor contraste */
             box-shadow: 0 4px 15px rgba(255, 123, 114, 0.1); /* Sombra correspondente ao vermelho do dark mode */
         }
         body.dark-mode #submitManutencaoBtn:hover, body.dark-mode .estacao-btn-maint:hover {
@@ -131,7 +131,7 @@
         }
         body.dark-mode .maintenance-tool-button {
             background-color: var(--dark-manutencao-primary); /* Usa o vermelho do dark mode */
-            color: var(--dark-bg);
+            color: #FFF; /* Alterado para branco para melhor contraste */
         }
         body.dark-mode .maintenance-tool-button:hover {
             background-color: var(--dark-manutencao-primary-dark); /* Usa o vermelho mais escuro do dark mode */
@@ -456,7 +456,7 @@
     <a class="maintenance-tool-button" href="index.html" title="Voltar para Operação">&#8629;</a>
     <script>
         // ADICIONE esta constante com a URL do seu Web App do Apps Script
-        const APPS_SCRIPT_URL = "https://script.google.com/a/macros/luftsolutions.com.br/s/AKfycbwBuZxbkm19YpD1jV7WNNxD6f9j6Y_gb9n7umqXUqTUgq3cirTJ6dJ0g_FqmvjNgnTz/exec"; // <<-- SUBSTITUA ESTE ID!
+        const APPS_SCRIPT_URL = "https://script.google.com/a/macros/luftsolutions.com.br/s/AKfycbx4h8xExkZZTtNzvr-Yo0FC8z4Wcnhk7dCchxBIxWVXO2ggYrNWnQRSYlWNsEkDra_Q/exec";
 
         let maquinaCache = null;
         let localizacaoSelecionada = null;
