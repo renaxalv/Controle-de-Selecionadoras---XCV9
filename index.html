@@ -848,8 +848,8 @@
 </div>
 <script>
     // ADICIONE esta constante com a URL do seu Web App do Apps Script
-    // URL que você forneceu no início da conversa
-    const APPS_SCRIPT_URL = "https://script.google.com/a/macros/luftsolutions.com.br/s/AKfycbx4h8xExkZZTtNzvr-Yo0FC8z4Wcnhk7dCchxBIxWVXO2ggYrNWnQRSYlWNsEkDra_Q/exec";
+    // URL que você forneceu
+    const APPS_SCRIPT_URL = "https://script.google.com/a/macros/luftsolutions.com.br/s/AKfycbwqqBNmA7NodPdyDFoDtyKQaibDzSmJGOjoYT_OGNuFP2Fhcx0gIjSN5b-E6XeXWJfk/exec";
 
     let currentUser = null;
     let estacaoSelecionada = localStorage.getItem('estacaoSelecionada');
@@ -877,7 +877,11 @@
         // PWA: Referência ao manifest.json no HTML (importante para "Add to Home Screen")
         const linkManifest = document.createElement('link');
         linkManifest.rel = 'manifest';
-        linkManifest.href = 'manifest.json';
+        // Ajuste aqui para buscar o manifest.json via Apps Script se ele for servido por lá.
+        // Se o manifest.json estiver no mesmo repositório do GitHub Pages, esta linha está correta.
+        // Se o Apps Script for servir o manifest, você precisaria de algo como:
+        // linkManifest.href = `${APPS_SCRIPT_URL}?file=manifest.json`;
+        linkManifest.href = 'manifest.json'; // Assumindo que manifest.json está no GitHub Pages
         document.head.appendChild(linkManifest);
 
 
@@ -965,25 +969,54 @@
         loginInput.focus();
     }
 
+    // --- FUNÇÃO CENTRALIZADA PARA ENVIAR REQUISIÇÕES AO APPS SCRIPT ---
+    async function sendRequestToAppsScript(action, data) {
+        exibirMensagem("Comunicando com o servidor...", "info", true);
+        try {
+            const response = await fetch(APPS_SCRIPT_URL, {
+                method: 'POST', // Sempre POST para API calls ao Apps Script
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ action: action, ...data }) // Envia a ação e os dados como JSON
+            });
+
+            if (!response.ok) {
+                // Tenta ler a resposta de erro do servidor
+                const errorText = await response.text();
+                throw new Error(`Erro HTTP: ${response.status} - ${errorText}`);
+            }
+
+            const result = await response.json(); // Espera JSON como resposta
+            return result;
+
+        } catch (err) {
+            console.error("Erro na requisição Apps Script:", err);
+            // Verifica se o erro é de rede (Failed to fetch)
+            if (err.message.includes("Failed to fetch") || err.message.includes("NetworkError")) {
+                throw new Error("Erro de conexão com o servidor. Verifique sua internet ou tente novamente.");
+            }
+            throw err; // Re-lança outros erros para serem tratados por quem chamou
+        }
+    }
+
+
     async function processarLogin(login) {
         if (!estacaoSelecionada) {
             solicitarEstacaoOperador();
             exibirMensagem("Selecione sua estação de operação.", 'error');
             return;
         }
-        exibirMensagem("Verificando login...", "info", true);
-
+        
         try {
-            const response = await fetch(`${APPS_SCRIPT_URL}?action=verificarLogin&userLogin=${encodeURIComponent(login)}`);
-            if (!response.ok) {
-                throw new Error(`Erro HTTP: ${response.status}`);
-            }
-            const data = await response.json();
+            // Usando a nova função sendRequestToAppsScript
+            const data = await sendRequestToAppsScript('verificarLogin', { userLogin: login });
 
             hideElement(messageDiv);
             if (data.success) {
                 currentUser = data.data;
                 mostrarUsuario(currentUser.nome);
+                exibirMensagem("Login verificado com sucesso!", 'success', true); // Feedback visual rápido
             } else {
                 exibirMensagem(data.message, 'error');
                 loginInput.classList.add('shake');
@@ -992,17 +1025,20 @@
             }
         } catch (err) {
             handleServerError(err);
+            loginInput.classList.add('shake');
+            setTimeout(() => loginInput.classList.remove('shake'), 500);
+            limparCampo('login');
         }
     }
 
     async function processarChaveNormal(chave) {
-        exibirMensagem("Registrando ação...", "info", true); // Adicionado feedback
         try {
-            const response = await fetch(`${APPS_SCRIPT_URL}?action=registrarAcao&idMaq=${encodeURIComponent(chave)}&userLogin=${encodeURIComponent(currentUser.login)}&estacao=${encodeURIComponent(estacaoSelecionada)}`);
-            if (!response.ok) {
-                throw new Error(`Erro HTTP: ${response.status}`);
-            }
-            const data = await response.json();
+            // Usando a nova função sendRequestToAppsScript
+            const data = await sendRequestToAppsScript('registrarAcao', { 
+                idMaq: chave, 
+                userLogin: currentUser.login, 
+                estacao: estacaoSelecionada 
+            });
             handleServerResponse(data);
         } catch (err) {
             handleServerError(err);
@@ -1019,8 +1055,13 @@
         } else {
             messageDiv.classList.add('cooldown-error');
             messageDiv.classList.add('shake');
-            setTimeout(() => messageDiv.classList.remove('shake'), 500);
+            // setTimeout(() => messageDiv.classList.remove('shake'), 500); // Já é removido pelo resetarFormulario
         }
+        // Remove a classe cooldown após a animação para permitir que ela seja ativada novamente
+        messageDiv.addEventListener('animationend', function handler() {
+            messageDiv.classList.remove('cooldown-success', 'cooldown-error');
+            messageDiv.removeEventListener('animationend', handler);
+        });
         setTimeout(resetarFormulario, 3500);
     }
 
@@ -1032,15 +1073,22 @@
     }
 
     function exibirMensagem(texto, tipo, isTemporary = false) {
-        messageDiv.className = 'message';
+        // Limpa classes anteriores para evitar conflitos de animação
+        messageDiv.className = 'message'; 
         messageDiv.classList.add(tipo);
         messageTextSpan.textContent = texto;
         showElement(messageDiv);
-        if (!isTemporary && (tipo === 'success' || tipo === 'error')) {
-            // Mensagens não temporárias (sucesso/erro) não se fecham automaticamente aqui.
-        } else if (isTemporary) {
-            setTimeout(() => { if (messageTextSpan.textContent === texto) hideElement(messageDiv); }, 3000);
+
+        if (isTemporary) {
+            setTimeout(() => { 
+                // Verifica se a mensagem atual ainda é a mesma antes de ocultar
+                if (messageTextSpan.textContent === texto) {
+                    hideElement(messageDiv); 
+                }
+            }, 3000);
         }
+        // As mensagens de sucesso/erro agora terão um cooldown visual e resetarFormulario cuida da ocultação.
+        // A lógica de `isTemporary = false` pode ser reavaliada se quiser que todas as mensagens sumam.
     }
 
     function mostrarUsuario(nome) {
@@ -1058,10 +1106,11 @@
         limparCampo('login');
         limparCampo('chave');
         currentUser = null;
-        hideElement(messageDiv);
+        hideElement(messageDiv); // Oculta a mensagem no reset
         hideElement(chaveFormGroup);
         hideElement(userDisplay);
-        messageDiv.classList.remove('cooldown-success', 'cooldown-error');
+        // Garante que as classes de cooldown sejam removidas para a próxima mensagem
+        messageDiv.classList.remove('cooldown-success', 'cooldown-error', 'shake'); 
         loginInput.focus();
     }
 </script>
