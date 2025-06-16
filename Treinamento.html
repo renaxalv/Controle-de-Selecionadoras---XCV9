@@ -116,7 +116,7 @@
         }
         body.dark-mode .voltar-btn {
             background-color: var(--dark-treinamento-primary);
-            color: var(--dark-bg);
+            color: #FFF; /* Alterado para branco para melhor contraste */
             box-shadow: var(--box-shadow-medium);
         }
         body.dark-mode .voltar-btn:hover {
@@ -402,10 +402,11 @@
 </div>
 <script>
     // ADICIONE esta constante com a URL do seu Web App do Apps Script
-    const APPS_SCRIPT_URL = "https://script.google.com/a/macros/luftsolutions.com.br/s/AKfycbwBuZxbkm19YpD1jV7WNNxD6f9j6Y_gb9n7umqXUqTUgq3cirTJ6dJ0g_FqmvjNgnTz/exec"; // <<-- SUBSTITUA ESTE ID!
+    const APPS_SCRIPT_URL = "https://script.google.com/a/macros/luftsolutions.com.br/s/AKfycbx4h8xExkZZTtNzvr-Yo0FC8z4Wcnhk7dCchxBIxWVXO2ggYrNWnQRSYlWNsEkDra_Q/exec"; // O URL que você forneceu!
 
     let currentUser = null;
-    let estacaoSelecionada = localStorage.getItem('estacaoSelecionada'); // Esta linha pode precisar de ajuste dependendo de como 'estacaoSelecionada' é usada no contexto de treinamento. No seu GAS não vi uso direto dela para treinamento.
+    // Removido 'estacaoSelecionada = localStorage.getItem('estacaoSelecionada');'
+    // porque o modo de treinamento usa 'TREINAMENTO' fixo e não depende da estação do localStorage.
     const mainContent = document.getElementById('mainContent');
     const loginInput = document.getElementById('login');
     const chaveInput = document.getElementById('chave');
@@ -482,7 +483,8 @@
     async function processarChaveTreinamento(chave) {
         exibirMensagem("Registrando treinamento...", "info", true); // Adicionado para feedback
         try {
-            const response = await fetch(`${APPS_SCRIPT_URL}?action=registrarTreinamento&idMaq=${encodeURIComponent(chave)}&userLogin=${encodeURIComponent(currentUser.login)}&estacao=TREINAMENTO`); // 'TREINAMENTO' fixo para estação
+            // A estação é fixa como 'TREINAMENTO' para esta página
+            const response = await fetch(`${APPS_SCRIPT_URL}?action=registrarTreinamento&idMaq=${encodeURIComponent(chave)}&userLogin=${encodeURIComponent(currentUser.login)}&estacao=TREINAMENTO`);
             if (!response.ok) {
                 throw new Error(`Erro HTTP: ${response.status}`);
             }
