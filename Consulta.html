@@ -409,34 +409,142 @@
         <h1>🔍 Consulta Rápida</h1>
         <div class="search-group">
             <input type="text" id="termoInput" placeholder="Nº da Máquina ou Login do Usuário" autofocus>
+            <button id="btnBuscar" style="display:none;">Buscar</button>
+        </div>
+        <div style="margin-top: 20px; text-align: left;">
+            <h2>Registrar Uso</h2>
+            <label for="maquina">Máquina:</label>
+            <input type="text" id="maquina" placeholder="Número da Máquina"><br><br>
+            <label for="usuario">Usuário:</label>
+            <input type="text" id="usuario" placeholder="Login do Usuário"><br><br>
+            <button id="btnSalvar" style="
+                padding: 12px 25px;
+                background-color: var(--color-primary);
+                color: white;
+                border: none;
+                border-radius: var(--border-radius-md);
+                font-size: 1.1em;
+                cursor: pointer;
+                transition: background-color 0.3s ease, transform 0.2s ease;
+            ">Salvar Dados</button>
         </div>
     </div>
     <div id="loaderContainer" class="loader-container" style="display: none;">
         <div id="loader" class="loader"></div>
     </div>
     <div id="resultArea"></div>
+
     <script>
-        // ADICIONE esta constante com a URL do seu Web App do Apps Script
-        const APPS_SCRIPT_URL = "https://script.google.com/a/macros/luftsolutions.com.br/s/AKfycbwBuZxbkm19YpD1jV7WNNxD6f9j6Y_gb9n7umqXUqTUgq3cirTJ6dJ0g_FqmvjNgnTz/exec"; // <<-- SUBSTITUA ESTE ID!
+        // URL do seu Apps Script (substitua pelo SEU link)
+        const API_URL = "https://script.google.com/a/macros/luftsolutions.com.br/s/AKfycbx4h8xExkZZTtNzvr-Yo0FC8z4Wcnhk7dCchxBIxWVXO2ggYrNWnQRSYlWNsEkDra_Q/exec"; // O URL que você forneceu
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const isDarkMode = localStorage.getItem('darkMode') === 'true';
-            if (isDarkMode) {
-                document.body.classList.add('dark-mode');
+        // Função para buscar dados
+        async function buscarDados() {
+            const termo = document.getElementById('termoInput').value.trim();
+            if (!termo) {
+                loaderContainer.style.display = 'none';
+                resultArea.textContent = "Por favor, insira um termo para a busca.";
+                resultArea.className = 'error';
+                resultArea.style.display = 'block';
+                resultArea.classList.add('shake');
+                setTimeout(() => resultArea.classList.remove('shake'), 500);
+                return;
             }
 
-            // Registro do Service Worker e Manifest (ADICIONADO)
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js')
-                    .then(() => console.log("Service Worker registrado com sucesso em Consulta!"))
-                    .catch(err => console.error("Erro ao registrar Service Worker em Consulta:", err));
-            }
-            // Não precisa de link rel="manifest" aqui se o service worker já estiver cuidando do cache do manifest,
-            // mas é boa prática ter ambos para garantir compatibilidade e descoberta.
-            // <link rel="manifest" href="manifest.json"> seria adicionado no HEAD
-            // Para simplicidade, vou manter apenas o SW aqui, assumindo que manifest.json está no cache.
-        });
+            loaderContainer.style.display = 'flex';
+            resultArea.style.display = 'none';
+            resultArea.classList.remove('success', 'error');
 
+            try {
+                const response = await fetch(`${API_URL}?action=consultarStatus&termo=${encodeURIComponent(termo)}`);
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                loaderContainer.style.display = 'none';
+                if (data.success) {
+                    let html = '';
+                    if (data.data.maquina) { html += `<p><strong>Máquina:</strong> ${data.data.maquina}</p>`; }
+                    if (data.data.status) { html += `<p><strong>Status:</strong> ${data.data.status}</p>`; }
+                    if (data.data.estacao) {
+                        html += `<p><strong>Localização:</strong> ${data.data.estacao}</p>`;
+                    }
+                    if (data.data.usuario && data.data.lider) {
+                        html += `<p><strong>Usuário:</strong> ${data.data.usuario}</p>`;
+                        html += `<p><strong>Líder do Usuário:</strong> ${data.data.lider}</p>`;
+                        html += `<p><strong>Setor do Usuário:</strong> ${data.data.setor}</p>`;
+                    } else if (data.data.usuario) {
+                        html += `<p><strong>Usuário:</strong> ${data.data.usuario}</p>`;
+                    }
+                    if (data.data.ultimoUsuario) {
+                        html += `<p><strong>Último Usuário:</strong> ${data.data.ultimoUsuario}</p>`;
+                        html += `<p><strong>Devolvido em:</strong> ${data.data.dataDevolucao}</p>`;
+                    }
+                    if (data.data.horas) {
+                        if (html !== '') { html += `<hr>`; }
+                        html += `<p class="horas-titulo">Horas de Uso (Exposição):</p>`;
+                        html += `<p class="horas-item">- Hoje: <strong>${formatarHorasEMinutos(data.data.horas.hoje)}</strong></p>`;
+                        html += `<p class="horas-item">- Esta Semana: <strong>${formatarHorasEMinutos(data.data.horas.semana)}</strong></p>`;
+                        html += `<p class="horas-item">- Este Mês: <strong>${formatarHorasEMinutos(data.data.horas.mes)}</strong></p>`;
+                        html += `<p class="horas-item">- Total: <strong>${formatarHorasEMinutos(data.data.horas.total)}</strong></p>`;
+                    }
+                    resultArea.innerHTML = html;
+                    resultArea.className = 'success';
+                } else {
+                    resultArea.textContent = data.message;
+                    resultArea.className = 'error';
+                }
+                resultArea.style.display = 'block';
+            } catch (error) {
+                loaderContainer.style.display = 'none';
+                resultArea.textContent = "Erro de comunicação com o servidor. Verifique sua conexão ou tente novamente.";
+                resultArea.className = 'error';
+                resultArea.style.display = 'block';
+                resultArea.classList.add('shake');
+                setTimeout(() => resultArea.classList.remove('shake'), 500);
+                console.error("Erro no fetch:", error); // Para depuração
+            }
+        }
+
+        // Função para enviar dados (do código que você me enviou anteriormente)
+        async function salvarDados() {
+            const maquina = document.getElementById("maquina").value.trim();
+            const usuario = document.getElementById("usuario").value.trim();
+
+            if (!maquina || !usuario) {
+                alert("Por favor, preencha os campos Máquina e Usuário para salvar os dados.");
+                return;
+            }
+
+            const dados = {
+                maquina: maquina,
+                usuario: usuario
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        action: "enviarDados",
+                        dados: dados 
+                    })
+                });
+                const resultado = await response.json();
+                alert(resultado.message);
+                // Opcional: Limpar campos após salvar com sucesso
+                if (resultado.success) {
+                    document.getElementById("maquina").value = '';
+                    document.getElementById("usuario").value = '';
+                }
+            } catch (error) {
+                console.error("Erro ao salvar:", error);
+                alert("Erro ao salvar os dados. Tente novamente.");
+            }
+        }
+
+        // Funções auxiliares e listeners já existentes
         const termoInput = document.getElementById('termoInput');
         const resultArea = document.getElementById('resultArea');
         const loaderContainer = document.getElementById('loaderContainer');
@@ -453,79 +561,32 @@
             if (minutos > 0) { partes.push(`${minutos} ${minutos === 1 ? 'minuto' : 'minutos'}`); }
             return partes.join(' e ');
         }
-
-        function consultar() {
-            const termo = termoInput.value.trim();
-            if (!termo) {
-                loaderContainer.style.display = 'none';
-                resultArea.textContent = "Por favor, insira um termo para a busca.";
-                resultArea.className = 'error';
-                resultArea.style.display = 'block';
-                resultArea.classList.add('shake');
-                setTimeout(() => resultArea.classList.remove('shake'), 500);
-                return;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
             }
 
-            loaderContainer.style.display = 'flex';
-            resultArea.style.display = 'none';
-            resultArea.classList.remove('success', 'error');
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js')
+                    .then(() => console.log("Service Worker registrado com sucesso em Consulta!"))
+                    .catch(err => console.error("Erro ao registrar Service Worker em Consulta:", err));
+            }
+            
+            // Adiciona o listener para o botão de buscar
+            document.getElementById("btnBuscar").addEventListener("click", buscarDados);
+            // Adiciona o listener para o input de termo (ao pressionar Enter)
+            termoInput.addEventListener('keydown', (e) => { 
+                if (e.key === 'Enter') { 
+                    buscarDados(); 
+                } 
+            });
 
-            // Mude de google.script.run para fetch
-            fetch(`${APPS_SCRIPT_URL}?action=consultarStatus&termo=${encodeURIComponent(termo)}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Erro HTTP: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(response => { // Renomeado 'data' para 'response' para manter consistência com o GAS
-                    loaderContainer.style.display = 'none';
-                    if (response.success) {
-                        const data = response.data; // Acessa 'data' dentro do objeto de resposta
-                        let html = '';
-                        if (data.maquina) { html += `<p><strong>Máquina:</strong> ${data.maquina}</p>`; }
-                        if (data.status) { html += `<p><strong>Status:</strong> ${data.status}</p>`; }
-                        if (data.estacao) {
-                            html += `<p><strong>Localização:</strong> ${data.estacao}</p>`;
-                        }
-                        if (data.usuario && data.lider) {
-                            html += `<p><strong>Usuário:</strong> ${data.usuario}</p>`;
-                            html += `<p><strong>Líder do Usuário:</strong> ${data.lider}</p>`;
-                            html += `<p><strong>Setor do Usuário:</strong> ${data.setor}</p>`;
-                        } else if (data.usuario) {
-                            html += `<p><strong>Usuário:</strong> ${data.usuario}</p>`;
-                        }
-                        if (data.ultimoUsuario) {
-                            html += `<p><strong>Último Usuário:</strong> ${data.ultimoUsuario}</p>`;
-                            html += `<p><strong>Devolvido em:</strong> ${data.dataDevolucao}</p>`;
-                        }
-                        if (data.horas) {
-                            if (html !== '') { html += `<hr>`; }
-                            html += `<p class="horas-titulo">Horas de Uso (Exposição):</p>`;
-                            html += `<p class="horas-item">- Hoje: <strong>${formatarHorasEMinutos(data.horas.hoje)}</strong></p>`;
-                            html += `<p class="horas-item">- Esta Semana: <strong>${formatarHorasEMinutos(data.horas.semana)}</strong></p>`;
-                            html += `<p class="horas-item">- Este Mês: <strong>${formatarHorasEMinutos(data.horas.mes)}</strong></p>`;
-                            html += `<p class="horas-item">- Total: <strong>${formatarHorasEMinutos(data.horas.total)}</strong></p>`;
-                        }
-                        resultArea.innerHTML = html;
-                        resultArea.className = 'success';
-                    } else {
-                        resultArea.textContent = response.message;
-                        resultArea.className = 'error';
-                    }
-                    resultArea.style.display = 'block';
-                })
-                .catch(err => {
-                    loaderContainer.style.display = 'none';
-                    resultArea.textContent = "Erro de comunicação com o servidor. Verifique sua conexão ou tente novamente.";
-                    resultArea.className = 'error';
-                    resultArea.style.display = 'block';
-                    resultArea.classList.add('shake');
-                    setTimeout(() => resultArea.classList.remove('shake'), 500);
-                    console.error("Erro no fetch:", err); // Para depuração
-                });
-        }
-        termoInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { consultar(); } });
+            // Adiciona o listener para o botão de salvar
+            document.getElementById("btnSalvar").addEventListener("click", salvarDados);
+        });
+
     </script>
 </body>
 </html>
